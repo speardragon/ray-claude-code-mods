@@ -1,0 +1,33 @@
+{
+  "name": "ray-claude-code-mods",
+  "description": "Ray's Claude Code mods: panes, bands and guards built on function hooks.",
+  "owner": {
+    "name": "Ray Kang"
+  },
+  "plugins": [
+    {
+      "name": "diff-explorer",
+      "description": "A VS Code-style side panel for the files Claude changes: a file tree with Material-style icons and a GitHub-dark diff preview. /diffs opens it.",
+      "version": "0.4.1",
+      "source": "./mods/diff-explorer",
+      "category": "See what's happening",
+      "tags": [
+        "pane",
+        "command",
+        "diff"
+      ]
+    },
+    {
+      "name": "prompt-history",
+      "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
+      "version": "0.2.2",
+      "source": "./mods/prompt-history",
+      "category": "See what's happening",
+      "tags": [
+        "pane",
+        "command",
+        "history"
+      ]
+    }
+  ]
+}

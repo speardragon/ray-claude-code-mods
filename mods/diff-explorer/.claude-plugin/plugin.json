@@ -1,0 +1,28 @@
+{
+  "name": "diff-explorer",
+  "version": "0.4.1",
+  "description": "A VS Code-style side panel for the files Claude changes: a file tree with Material-style icons and a GitHub-dark diff preview. /diffs opens it.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "icons": {
+      "type": "string",
+      "title": "Icons",
+      "default": "nerd",
+      "options": [
+        "nerd",
+        "plain"
+      ],
+      "description": "nerd: Material-style file icons drawn with Nerd Font glyphs (needs a Nerd Font in the terminal). plain: colored dots, works with any font."
+    },
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Open on first change",
+      "default": true,
+      "description": "Open the panel beside the chat the first time Claude changes a file in a session (only where it would dock as a sidebar)."
+    }
+  }
+}

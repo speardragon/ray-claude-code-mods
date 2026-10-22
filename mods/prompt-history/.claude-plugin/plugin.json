@@ -1,0 +1,22 @@
+{
+  "name": "prompt-history",
+  "version": "0.2.2",
+  "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "locale": {
+      "type": "string",
+      "title": "Language",
+      "default": "ko",
+      "options": [
+        "ko",
+        "en"
+      ],
+      "description": "How times read: ko (3분 전, 10월 22일) or en (3m ago, Oct 22). The pane's toolbar switches it for the session."
+    }
+  }
+}

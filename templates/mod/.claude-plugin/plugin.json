@@ -1,0 +1,10 @@
+{
+  "name": "__MOD__",
+  "version": "0.1.0",
+  "description": "__DESCRIPTION__",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
