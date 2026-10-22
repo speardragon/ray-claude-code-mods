@@ -19,4 +19,7 @@ Claude Code mods (function-hook plugins) collection. Each mod lives in `mods/<na
 - Values a drawing reads live in `$.state` atoms declared in `types/index.d.ts`; module variables reset on reload.
 - Never name anything `h` or `Fragment` in a `.tsx` file: JSX compiles against the global `h`.
 - Tests mount panes on both `terminal` and `desktop` surfaces.
-- Docs for people (READMEs) are in Korean; code and comments in English.
+- Docs for people come in two languages: `README.md` in Korean (the default GitHub shows) and `README.en.md` in
+  English, each linking the other on its second line. Code and comments are in English.
+- Screenshots are real renders, not mockups: `scripts/shots/<mod>.shot.tsx` mounts the mod's pane on demo data and
+  `node scripts/shots/render.mjs [mod]` photographs it into `images/` (needs Chrome; fetches Nerd Font symbols once).

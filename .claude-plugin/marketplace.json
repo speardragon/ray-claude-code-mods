@@ -18,6 +18,18 @@
       ]
     },
     {
+      "name": "mod-manager",
+      "description": "Your installed Claude Code mods in one pane: browse them with their READMEs, switch each on or off, and open their panels. /mods opens it.",
+      "version": "0.1.0",
+      "source": "./mods/mod-manager",
+      "category": "Manage",
+      "tags": [
+        "pane",
+        "command",
+        "plugins"
+      ]
+    },
+    {
       "name": "prompt-history",
       "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
       "version": "0.2.2",

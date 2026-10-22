@@ -3,3 +3,7 @@
 node_modules/
 .DS_Store
 *.log
+
+# Fonts the screenshot script fetches.
+scripts/shots/.cache/
+images/*.html
