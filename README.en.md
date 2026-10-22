@@ -1,8 +1,8 @@
 <h1 align="center">ray-claude-code-mods</h1>
 
 <p align="center">
-  <b>Side panels for Claude Code</b><br>
-  The files Claude changed, the prompts you sent, the mods you installed, without leaving the terminal.
+  <b>Claude Code mods I built for my own use.</b><br>
+  Plugins built on function hooks: panels beside the chat, bands above the prompt, guards and more. Install only the ones you want.
 </p>
 
 <p align="center">

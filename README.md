@@ -1,8 +1,8 @@
 <h1 align="center">ray-claude-code-mods</h1>
 
 <p align="center">
-  <b>Claude Code 옆에 붙여 쓰는 패널 모음</b><br>
-  Claude가 바꾼 파일, 내가 보낸 프롬프트, 설치한 mod를 터미널을 떠나지 않고 한눈에.
+  <b>내가 쓰려고 만든 Claude Code mods 모음.</b><br>
+  function hooks 기반 플러그인: 채팅 옆 패널, 프롬프트 위 밴드, 가드 등. 원하는 것만 골라 설치하세요.
 </p>
 
 <p align="center">
