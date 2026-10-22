@@ -124,3 +124,26 @@ test('a list row never runs past its width, and its time always shows whole', as
     await ui.unmount()
   }
 })
+
+test('the Copy button puts the shown prompt on the clipboard and says so', async ($, on) => {
+  const transcript = [row('p1', 'copy me\nplease', new Date(Date.now() - 60_000).toISOString())].join('\n')
+  const copied: unknown[] = []
+  on('command.register', () => ({ value: { command: 'prompts' } }))
+  on('env.get', (_, e) => ({ value: e.name === 'HOME' ? '/home/me' : undefined }))
+  on('session.id', () => ({ value: 'sid' }))
+  on('process.run', (_, e) => ({
+    value: { exitCode: 0, stdout: e.argv[0] === 'date' ? '+0900\n' : transcript, stderr: '', isStdoutTruncated: false, isStderrTruncated: false },
+  }))
+  on('ui.copy', (_, e) => {
+    copied.push(e)
+    return { value: { isCopied: true } }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await ui.press({ key: 'copy' })
+  expect(JSON.stringify(copied)).toContain('copy me\\nplease')
+  expect(await ui.find({ type: 'Text', text: /✓ #1 복사됨/, in: 'pfoot' })).toBeDefined()
+  await ui.unmount()
+})

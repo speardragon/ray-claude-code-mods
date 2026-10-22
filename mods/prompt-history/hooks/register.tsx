@@ -6,7 +6,7 @@
 //   jumps to the nth prompt. Prompts already sent are read from the transcript file when the mod
 //   loads; new ones arrive through session.append.
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, Register, RenderSurface } from 'claude-code'
 
 import type { Locale, Prompt, Scroll } from '../types'
 import type { ListRow } from './list-client'
@@ -85,6 +85,24 @@ async function jump($: EngineInterface, uuid: string) {
 async function select($: EngineInterface, uuid: string) {
   await update($, selected, () => uuid)
   await update($, scroll, s => ({ ...s, preview: 0, previewFor: uuid }))
+  await update($, note, () => '')
+}
+
+// Puts a prompt's text on the clipboard of the surface the press came from.
+async function copy($: EngineInterface, uuid: string, surface: RenderSurface) {
+  const prompt = (await read($, prompts)).find(p => p.uuid === uuid)
+  if (!prompt) return
+  const ko = ((await read($, locale)) ?? session.locale) === 'ko'
+  const done = await $.ui.copy({ text: prompt.text, surface }).catch((error: unknown) => ({
+    isCopied: false as const,
+    reason: error instanceof Error ? error.message : String(error),
+  }))
+  const no = drawn.order.indexOf(uuid) + 1
+  await update($, note, () =>
+    done.isCopied
+      ? ko ? `✓ #${no} 복사됨 (${prompt.text.length.toLocaleString('en-US')}자)` : `✓ Copied #${no} (${prompt.text.length.toLocaleString('en-US')} chars)`
+      : ko ? `복사 못 함: ${done.reason}` : `Could not copy: ${done.reason}`,
+  )
 }
 
 // Keeps the picked prompt inside the list's window.
@@ -255,6 +273,12 @@ export const register: Register = (on, options) => {
   })
 
   // The Jump button: a press is the person's own input, so this hook's `$` may move the transcript.
+  on('ui.press', { requestId: PANE, element: 'copy' }, async ($, e, next) => {
+    const uuid = drawn.shown
+    if (uuid) await copy($, uuid, e.surface)
+    return next(e)
+  })
+
   on('ui.press', { requestId: PANE, element: 'jump' }, async ($, e, next) => {
     const uuid = drawn.shown
     if (uuid) await jump($, uuid)

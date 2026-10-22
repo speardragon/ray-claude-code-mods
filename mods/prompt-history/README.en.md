@@ -14,6 +14,7 @@ ones in full, and take the transcript back to one with a single press.
   every 30 seconds; however long the time reads, the prompt's text gives way so the time always shows whole.
 - **The full text**: the picked prompt on the right as written, wrapped at words. Scroll with the wheel, the
   scrollbar or `↑` `↓`.
+- **Copy**: `[ ⧉ Copy ]` puts the picked prompt's full text on the clipboard, to send again or paste elsewhere.
 - **Jump back**: `[ ↗ Jump ]` or `/prompts <n>` scrolls the transcript to that prompt.
 - **Earlier prompts too**: on load it reads what you already sent from the session's transcript, then adds each new
   prompt as you send it. Slash commands, their output and the engine's own messages are left out; `/clear` empties it.
@@ -32,6 +33,7 @@ ones in full, and take the transcript back to one with a single press.
 | `/prompts` | Opens the panel |
 | `/prompts 3` | Jumps straight to the third prompt |
 | Click a list row | Picks that prompt and shows it in full |
+| `[ ⧉ Copy ]` | Copies the picked prompt's full text to the clipboard |
 | `[ ↗ Jump ]` | Takes the transcript to the picked prompt (or `ctrl+x tab` to it, then `Enter`) |
 | Click the list, then `↑` `↓` / `j` `k` | Picks a prompt; `Home` `End` for the first / last |
 | Status row `▲` `▼` | A page up / down in the full text |

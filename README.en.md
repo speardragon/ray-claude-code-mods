@@ -75,6 +75,7 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 
 - **Grouped by day**: `Today` · `Yesterday` · `Oct 20 (Mon)`, each prompt with `just now` → `3m ago` → `2h ago`.
 - **The full text**: the picked prompt on the right, line breaks and all, scrollable when long.
+- **Copy**: `[ ⧉ Copy ]` puts a prompt's full text on the clipboard.
 - **Jump back**: `[ ↗ Jump ]` or `/prompts 3` scrolls the transcript to that prompt.
 - **English / 한국어**: switch how times read from the toolbar.
 

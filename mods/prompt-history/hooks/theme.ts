@@ -19,4 +19,5 @@ export const C = {
   thumb: '#484f58', // its thumb at rest
   thumbActive: '#8b949e', // under the pointer or dragged
   warn: '#d29922', // a jump the engine refused
+  ok: '#3fb950', // a copy that went through
 } as const

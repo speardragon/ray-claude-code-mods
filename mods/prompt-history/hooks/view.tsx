@@ -83,8 +83,8 @@ export type PaneModel = {
 }
 
 const T = {
-  ko: { title: 'PROMPTS', count: (n: number) => `${n}개`, empty: '아직 보낸 프롬프트가 없어요.', emptyHint: '프롬프트를 보내면 여기에 쌓여요.', jump: '↗ 이동', picked: '↗ 이동 버튼으로 위치 이동', lines: '줄', chars: '자', pick: '목록에서 프롬프트를 고르세요.' },
-  en: { title: 'PROMPTS', count: (n: number) => `${n} prompt${n === 1 ? '' : 's'}`, empty: 'No prompts yet.', emptyHint: 'Prompts you send collect here.', jump: '↗ Jump', picked: '↗ Jump goes back to it', lines: 'lines', chars: 'chars', pick: 'Pick a prompt from the list.' },
+  ko: { title: 'PROMPTS', count: (n: number) => `${n}개`, empty: '아직 보낸 프롬프트가 없어요.', emptyHint: '프롬프트를 보내면 여기에 쌓여요.', jump: '↗ 이동', copy: '⧉ 복사', picked: '↗ 이동 버튼으로 위치 이동', lines: '줄', chars: '자', pick: '목록에서 프롬프트를 고르세요.' },
+  en: { title: 'PROMPTS', count: (n: number) => `${n} prompt${n === 1 ? '' : 's'}`, empty: 'No prompts yet.', emptyHint: 'Prompts you send collect here.', jump: '↗ Jump', copy: '⧉ Copy', picked: '↗ Jump goes back to it', lines: 'lines', chars: 'chars', pick: 'Pick a prompt from the list.' },
 } as const
 
 // ---- building blocks --------------------------------------------------------------------------
@@ -243,20 +243,27 @@ function PreviewHead({ m }: { m: PaneModel }) {
   const w = m.at.previewWidth
   const shown = m.shown!
   const stats = ` ${shown.prompt.text.split('\n').length}${m.locale === 'ko' ? '' : ' '}${t.lines} · ${shown.prompt.text.length.toLocaleString('en-US')}${m.locale === 'ko' ? '' : ' '}${t.chars} `
-  const jumpWidth = textWidth(t.jump) + 4 + 1 // `[ label ]` and a cell after
+  const buttons = textWidth(t.copy) + 4 + 1 + textWidth(t.jump) + 4 + 1 // each `[ label ]` and a cell after
+  const lead = ` #${shown.no}  ${shown.when}`
+  // The counts go first when the buttons leave too little room for them.
+  const hasStats = textWidth(lead) + 1 + textWidth(stats) <= w - buttons
   const items: Item[] = [
     text([
       { text: ` #${shown.no}`, color: C.accent, bold: true },
       { text: `  ${shown.when}`, color: C.muted },
     ]),
     spacer,
-    text([{ text: stats, color: C.subtle }]),
+    ...(hasStats ? [text([{ text: stats, color: C.subtle }])] : []),
   ]
   return (
     <Box flexDirection="column" width={w}>
       <Box flexDirection="row" width={w} height={1} overflow="hidden" backgroundColor={C.canvas}>
-        <ChromeRow m={m} id="phead" w={Math.max(1, w - jumpWidth)} bg={C.canvas} items={items} />
-        {/* Handled by the `ui.press` hook, whose `$` answers the press: a closure here would not. */}
+        <ChromeRow m={m} id="phead" w={Math.max(1, w - buttons)} bg={C.canvas} items={items} />
+        {/* Both handled by `ui.press` hooks, whose `$` answers the press: a closure here would not. */}
+        <Button key="copy" onPress={() => undefined}>
+          {t.copy}
+        </Button>
+        <Text backgroundColor={C.canvas}> </Text>
         <Button key="jump" variant="primary" autoFocus onPress={() => undefined}>
           {t.jump}
         </Button>
@@ -276,7 +283,12 @@ function PreviewFoot({ m }: { m: PaneModel }) {
   const total = shown.rows.length
   const first = total === 0 ? 0 : m.previewOffset + 1
   const last = Math.min(total, m.previewOffset + m.at.previewRows)
-  const state = m.note ? { text: ` ⚠ ${m.note}`, color: C.warn } : { text: ` ${t.picked}`, color: C.muted }
+  // A note starting with ✓ reports something done (a copy); any other, something refused.
+  const state = m.note.startsWith('✓')
+    ? { text: ` ${m.note}`, color: C.ok }
+    : m.note
+      ? { text: ` ⚠ ${m.note}`, color: C.warn }
+      : { text: ` ${t.picked}`, color: C.muted }
   const controls: Item[] = [control('up', '▲'), control('down', '▼'), text([{ text: ' ' }])]
   const where = text([{ text: `  ${first}–${last}/${total}`, color: C.muted }])
   const room = w - 6 - 1 - 14

@@ -32,7 +32,7 @@
     {
       "name": "prompt-history",
       "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "source": "./mods/prompt-history",
       "category": "See what's happening",
       "tags": [
