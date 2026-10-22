@@ -8,7 +8,7 @@
     {
       "name": "diff-explorer",
       "description": "A VS Code-style side panel for the files Claude changes: a file tree with Material-style icons and a GitHub-dark diff preview. /diffs opens it.",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "source": "./mods/diff-explorer",
       "category": "See what's happening",
       "tags": [
@@ -20,7 +20,7 @@
     {
       "name": "mod-manager",
       "description": "Your installed Claude Code mods in one pane: browse them with their READMEs, switch each on or off, and open their panels. /mods opens it.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./mods/mod-manager",
       "category": "Manage",
       "tags": [
@@ -32,7 +32,7 @@
     {
       "name": "prompt-history",
       "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "source": "./mods/prompt-history",
       "category": "See what's happening",
       "tags": [

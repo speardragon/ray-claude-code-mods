@@ -30,14 +30,29 @@ ones in full, and take the transcript back to one with a single press.
 
 | Input | Does |
 | --- | --- |
-| `/prompts` | Opens the panel |
+| `/prompts` | Toggles the panel. Opening it gives it the keys, so `↑` `↓` pick right away |
+| `/prompts on` · `/prompts off` | Opens · closes the panel |
 | `/prompts 3` | Jumps straight to the third prompt |
+| `↑` `↓` | (panel focused) Picks a prompt; `PageUp` `PageDown` several at a time, `Home` `End` the first / last |
+| `Enter` | (panel focused) Takes the transcript to the picked prompt |
 | Click a list row | Picks that prompt and shows it in full |
 | `[ ⧉ Copy ]` | Copies the picked prompt's full text to the clipboard |
-| `[ ↗ Jump ]` | Takes the transcript to the picked prompt (or `ctrl+x tab` to it, then `Enter`) |
-| Click the list, then `↑` `↓` / `j` `k` | Picks a prompt; `Home` `End` for the first / last |
+| `[ ↗ Jump ]` | Takes the transcript to the picked prompt |
 | Status row `▲` `▼` | A page up / down in the full text |
 | Wheel · scrollbars | The wheel scrolls the column under it |
+
+## Focus: the panel and the prompt
+
+Keys go to one place at a time: the prompt, or the panel.
+
+| To | Do |
+| --- | --- |
+| Move to the panel | Automatic when `/prompts` opens it; or `ctrl+x tab`; or click one of its buttons |
+| Go back to the prompt | `Esc` (the panel stays open) |
+| Close the panel | `/prompts` again, `/prompts off`, or `ctrl+x x` |
+
+With the panel focused, `↑` `↓` move through the list and `Enter` presses Jump. With the prompt focused, keys type as
+usual and `↑` walks your prompt history.
 
 ## Options
 

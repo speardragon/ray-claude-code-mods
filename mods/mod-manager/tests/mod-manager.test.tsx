@@ -107,3 +107,34 @@ test('the pane lists mods, shows the picked one, and a switch disables it', asyn
   expect(await ui.find({ type: 'Text', text: /OFF/, in: 'list' })).toBeDefined()
   await ui.unmount()
 })
+
+test('/mods toggles the pane; on and off say which', async ($, on) => {
+  let open = false
+  const calls: string[] = []
+  on('command.register', () => ({ value: { command: 'mods' } }))
+  on('env.get', () => ({ value: undefined }))
+  on('process.run', () => ({ value: { exitCode: 0, stdout: '[]', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('command.list', () => ({ value: [] }))
+  on('fs.list', () => ({ value: [] }))
+  on('ui.panes', () => ({ value: open ? [{ id: 'mod-manager', title: '', isShown: true, isFocused: true, isPlaced: true }] : [] }))
+  on('ui.open', () => {
+    open = true
+    calls.push('open')
+    return { value: { isPlaced: true } }
+  })
+  on('ui.close', () => {
+    open = false
+    calls.push('close')
+    return { value: undefined }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const run = (args: string) =>
+    $.command.run({ command: 'mods', args, origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 200 } })
+
+  await run('')
+  await run('')
+  await run('on')
+  await run('off')
+  expect(calls).toEqual(['open', 'close', 'open', 'close'])
+})

@@ -76,6 +76,7 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 - **Grouped by day**: `Today` · `Yesterday` · `Oct 20 (Mon)`, each prompt with `just now` → `3m ago` → `2h ago`.
 - **The full text**: the picked prompt on the right, line breaks and all, scrollable when long.
 - **Copy**: `[ ⧉ Copy ]` puts a prompt's full text on the clipboard.
+- **Straight from the keyboard**: `/prompts` opens it focused, `↑` `↓` pick, `Enter` jumps; `/prompts` again closes it.
 - **Jump back**: `[ ↗ Jump ]` or `/prompts 3` scrolls the transcript to that prompt.
 - **English / 한국어**: switch how times read from the toolbar.
 
@@ -106,8 +107,9 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 
 | Action | How |
 | --- | --- |
-| Open / close a panel | Each mod's command (`/diffs` `/prompts` `/mods`); close with the panel's close mark or `ctrl+x x` |
-| Panel keys | Click into the panel once, then type |
+| Open / close a panel | Each mod's command (`/diffs` `/prompts` `/mods`) toggles it, `on` · `off` say which; `ctrl+x x` closes too |
+| Panel ↔ prompt | `ctrl+x tab` to the panel, `Esc` back to the prompt |
+| Panel keys | While the panel has the keys (for diff-explorer, click into it once) |
 | Scrolling | The wheel scrolls the column under it; scrollbars drag and click |
 | Several panels | Click a tab, or `ctrl+x tab` |
 

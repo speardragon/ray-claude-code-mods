@@ -1,6 +1,6 @@
 {
   "name": "prompt-history",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The prompts you typed this session, listed beside the chat with how long ago you sent each; click one to read it in full and jump back to it. /prompts opens it.",
   "author": {
     "name": "Ray Kang"

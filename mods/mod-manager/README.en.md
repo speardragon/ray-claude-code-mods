@@ -29,7 +29,8 @@ one by one, and open each mod's panel with a button.
 
 | Input | Does |
 | --- | --- |
-| `/mods` | Opens the panel (reads the installed plugins afresh each time) |
+| `/mods` | Toggles the panel (reads the installed plugins afresh each time it opens) |
+| `/mods on` · `/mods off` | Opens · closes the panel |
 | `/mods refresh` | Reads the installed plugins again |
 | Click a list row | Shows that mod's details |
 | A row's `ON` / `OFF`, or `● Enabled` in the details | Switches it on or off |

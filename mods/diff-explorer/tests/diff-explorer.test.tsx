@@ -257,3 +257,31 @@ test('with wrap off, long lines scroll sideways by the bar and by h/l', async ($
   expect(await ui.find({ type: 'Text', text: /–160\/160/, in: 'status' })).toBeDefined()
   await ui.unmount()
 })
+
+test('/diffs toggles the pane; on and off say which', async ($, on) => {
+  let open = false
+  const calls: string[] = []
+  on('command.register', () => ({ value: { command: 'diffs' } }))
+  on('env.get', () => ({ value: undefined }))
+  on('ui.panes', () => ({ value: open ? [{ id: 'diff-explorer', title: '', isShown: true, isFocused: true, isPlaced: true }] : [] }))
+  on('ui.open', () => {
+    open = true
+    calls.push('open')
+    return { value: { isPlaced: true } }
+  })
+  on('ui.close', () => {
+    open = false
+    calls.push('close')
+    return { value: undefined }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const run = (args: string) =>
+    $.command.run({ command: 'diffs', args, origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 200 } })
+
+  await run('')
+  await run('')
+  await run('on')
+  await run('off')
+  expect(calls).toEqual(['open', 'close', 'open', 'close'])
+})

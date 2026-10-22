@@ -231,6 +231,9 @@ async function pressKey($: EngineInterface, element: string, key: string) {
   return undefined
 }
 
+const isOpen = async ($: EngineInterface) => (await $.ui.panes().catch(() => [])).some(p => p.id === PANE)
+
+// /diffs toggles the pane; on and off say which; clear forgets what was tracked.
 async function command($: EngineInterface, args: string) {
   const arg = args.trim().toLowerCase()
   if (arg === 'clear') {
@@ -242,9 +245,9 @@ async function command($: EngineInterface, args: string) {
     reads.clear()
     return { text: 'Cleared. Files Claude changes from now on show up again.' }
   }
-  if (arg === 'close') {
+  if (arg === 'off' || arg === 'close' || (arg === '' && (await isOpen($)))) {
     await $.ui.close({ id: PANE }).catch(() => undefined)
-    return { text: 'Closed.' }
+    return { text: `Closed. /${session.command} opens it again.` }
   }
   const opened = await openPane($, true)
   const count = (await read($, files)).length
@@ -263,7 +266,7 @@ export const register: Register = (on, options) => {
     // /diffs, or /diff-explorer if a built-in or another plugin ever takes /diffs.
     for (const name of ['diffs', 'diff-explorer']) {
       const ok = await $.command
-        .register({ name, description: 'Show the files Claude changed, as a tree with their diffs', argumentHint: '[clear | close]' })
+        .register({ name, description: 'Show the files Claude changed, as a tree with their diffs', argumentHint: '[on | off | clear]' })
         .then(() => true)
         .catch(() => false)
       if (ok) {

@@ -1,6 +1,6 @@
 {
   "name": "mod-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Your installed Claude Code mods in one pane: browse them with their READMEs, switch each on or off, and open their panels. /mods opens it.",
   "author": {
     "name": "Ray Kang"

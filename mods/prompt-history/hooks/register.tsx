@@ -13,6 +13,7 @@ import type { ListRow } from './list-client'
 import { textWidth, truncate, wrapText } from './text'
 import { clock, date, dayLabel, parseOffset, relative, sameDay } from './time'
 import { HUMAN_MARK, parseTranscript, promptText, transcriptPath } from './transcript'
+import { keyStep } from './keys'
 import { layout, Pane } from './view'
 import type { Action, Layout, Shown } from './view'
 
@@ -128,7 +129,8 @@ async function pick($: EngineInterface, by: number) {
   const current = (await read($, selected)) ?? drawn.shown
   const at = current ? order.indexOf(current) : order.length
   const next = order[clamp(at + by, 0, order.length - 1)]!
-  await update($, selected, () => next)
+  if (next === current) return
+  await select($, next)
   await reveal($, next)
 }
 
@@ -188,9 +190,17 @@ async function openPane($: EngineInterface, focus: boolean) {
   return $.ui.open({ id: PANE, title: TITLE, columns: DOCK_COLUMNS, ...(focus ? { focus: true as const } : {}) })
 }
 
+const isOpen = async ($: EngineInterface) => (await $.ui.panes().catch(() => [])).some(p => p.id === PANE)
+
+// /prompts toggles the pane; on and off say which; a number jumps to that prompt.
 async function command($: EngineInterface, args: string) {
-  const arg = args.trim()
-  const opened = await openPane($, arg === '')
+  const arg = args.trim().toLowerCase()
+  const wantsOff = arg === 'off' || arg === 'close' || (arg === '' && (await isOpen($)))
+  if (wantsOff) {
+    await $.ui.close({ id: PANE }).catch(() => undefined)
+    return { text: 'Closed. /prompts opens it again.' }
+  }
+  const opened = await openPane($, arg === '' || arg === 'on' || arg === 'open')
   const list = await read($, prompts)
   if (/^\d+$/.test(arg)) {
     const target = list[Number(arg) - 1]
@@ -200,7 +210,7 @@ async function command($: EngineInterface, args: string) {
     return { text: moved.deny ? `Could not jump to #${arg}: ${moved.deny}` : `Jumped to prompt #${arg}.` }
   }
   if (!opened.isPlaced) return { text: `The pane could not be shown (${opened.reason}).` }
-  return { text: `${list.length} prompt${list.length === 1 ? '' : 's'}. Click one to read it, then ↗ Jump (or /${session.command} <n>) to go back to it.` }
+  return { text: `${list.length} prompt${list.length === 1 ? '' : 's'}. ↑↓ pick one, Enter jumps back to it; Esc hands the keys back to the prompt, /${session.command} closes the pane.` }
 }
 
 export const register: Register = (on, options) => {
@@ -210,7 +220,7 @@ export const register: Register = (on, options) => {
     const r = await next(e)
     for (const name of ['prompts', 'prompt-history']) {
       const ok = await $.command
-        .register({ name, description: 'List the prompts you sent this session; jump back to one', argumentHint: '[number]' })
+        .register({ name, description: 'List the prompts you sent this session; jump back to one', argumentHint: '[on | off | number]' })
         .then(() => true)
         .catch(() => false)
       if (ok) {
@@ -285,8 +295,14 @@ export const register: Register = (on, options) => {
     return next(e)
   })
 
-  // The wheel scrolls the column under it; the keys (no pointer) scroll the preview.
+  // The wheel scrolls the column under it. The pane's keys (a scroll with no pointer) walk the
+  // list instead, the engine's window kept still: so with the pane focused, ↑↓ pick at once.
   on('ui.scroll', { component: 'Pane', requestId: PANE }, async ($, e) => {
+    if (e.origin.kind === 'person' && e.pointer === undefined) {
+      const step = keyStep(e.by, e.bodyRows, e.contentRows, (drawn.layout?.listRows ?? 10) - 2)
+      if (step !== 0) await pick($, step)
+      return {}
+    }
     const at = drawn.layout
     const overList =
       at !== null && e.pointer !== undefined && (at.isStacked ? e.pointer.row < at.listRows + 2 : e.pointer.column < at.listWidth)

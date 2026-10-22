@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
+import { END, keyStep } from '../hooks/keys'
 import { wrapText } from '../hooks/text'
 import { clock, dayLabel, parseOffset, relative } from '../hooks/time'
 import { parseTranscript, promptText, transcriptPath } from '../hooks/transcript'
@@ -146,4 +147,44 @@ test('the Copy button puts the shown prompt on the clipboard and says so', async
   expect(JSON.stringify(copied)).toContain('copy me\\nplease')
   expect(await ui.find({ type: 'Text', text: /✓ #1 복사됨/, in: 'pfoot' })).toBeDefined()
   await ui.unmount()
+})
+
+test('the pane keys read as moves through the list', async () => {
+  // A 30-row window over 31 rows: arrows a row, page keys a window, Home and End the whole tree.
+  expect(keyStep(1, 30, 31, 8)).toBe(1)
+  expect(keyStep(-1, 30, 31, 8)).toBe(-1)
+  expect(keyStep(30, 30, 31, 8)).toBe(8)
+  expect(keyStep(-31, 30, 31, 8)).toBe(-END)
+  expect(keyStep(0, 30, 31, 8)).toBe(0)
+})
+
+test('/prompts toggles the pane; on and off say which', async ($, on) => {
+  let open = false
+  const calls: string[] = []
+  on('command.register', () => ({ value: { command: 'prompts' } }))
+  on('env.get', () => ({ value: undefined }))
+  on('session.id', () => ({ value: 'sid' }))
+  on('process.run', () => ({ value: { exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('ui.panes', () => ({ value: open ? [{ id: 'prompt-history', title: 'Prompts', isShown: true, isFocused: true, isPlaced: true }] : [] }))
+  on('ui.open', () => {
+    open = true
+    calls.push('open')
+    return { value: { isPlaced: true } }
+  })
+  on('ui.close', () => {
+    open = false
+    calls.push('close')
+    return { value: undefined }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const run = (args: string) =>
+    $.command.run({ command: 'prompts', args, origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 200 } })
+
+  await run('')
+  await run('')
+  await run('on')
+  await run('on')
+  await run('off')
+  expect(calls).toEqual(['open', 'close', 'open', 'open', 'close'])
 })

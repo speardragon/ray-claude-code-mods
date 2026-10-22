@@ -31,9 +31,9 @@ the terminal.
 
 | Key | Click | Does |
 | --- | --- | --- |
-| `/diffs` | | Opens the panel |
+| `/diffs` | | Toggles the panel |
+| `/diffs on` · `/diffs off` | | Opens · closes the panel |
 | `/diffs clear` | | Forgets what was tracked (files as they are now become the baseline) |
-| `/diffs close` | | Closes the panel |
 | `t` | Toolbar `Explorer` | Shows or hides the explorer |
 | `c` | Right of the explorer's title | Collapses or expands every folder |
 | `p` / `n` | File header `‹` `›` | Previous / next file |

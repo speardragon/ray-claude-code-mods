@@ -83,8 +83,8 @@ export type PaneModel = {
 }
 
 const T = {
-  ko: { title: 'PROMPTS', count: (n: number) => `${n}개`, empty: '아직 보낸 프롬프트가 없어요.', emptyHint: '프롬프트를 보내면 여기에 쌓여요.', jump: '↗ 이동', copy: '⧉ 복사', picked: '↗ 이동 버튼으로 위치 이동', lines: '줄', chars: '자', pick: '목록에서 프롬프트를 고르세요.' },
-  en: { title: 'PROMPTS', count: (n: number) => `${n} prompt${n === 1 ? '' : 's'}`, empty: 'No prompts yet.', emptyHint: 'Prompts you send collect here.', jump: '↗ Jump', copy: '⧉ Copy', picked: '↗ Jump goes back to it', lines: 'lines', chars: 'chars', pick: 'Pick a prompt from the list.' },
+  ko: { title: 'PROMPTS', count: (n: number) => `${n}개`, empty: '아직 보낸 프롬프트가 없어요.', emptyHint: '프롬프트를 보내면 여기에 쌓여요.', jump: '↗ 이동', copy: '⧉ 복사', picked: '↑↓ 고르기 · Enter 이동', lines: '줄', chars: '자', pick: '목록에서 프롬프트를 고르세요.' },
+  en: { title: 'PROMPTS', count: (n: number) => `${n} prompt${n === 1 ? '' : 's'}`, empty: 'No prompts yet.', emptyHint: 'Prompts you send collect here.', jump: '↗ Jump', copy: '⧉ Copy', picked: '↑↓ pick · Enter jumps', lines: 'lines', chars: 'chars', pick: 'Pick a prompt from the list.' },
 } as const
 
 // ---- building blocks --------------------------------------------------------------------------
@@ -356,9 +356,12 @@ export function Pane({ m }: { m: PaneModel }) {
     </Box>
   )
   return (
-    <Box flexDirection="column" width={m.at.width} height={m.at.height} overflow="hidden" backgroundColor={C.canvas}>
+    // One row past the body, never shown: the engine sends the pane's arrow keys only while it has
+    // rows to scroll, and the ui.scroll hook turns them into moves through the list.
+    <Box flexDirection="column" width={m.at.width} height={m.at.height + 1} overflow="hidden" backgroundColor={C.canvas}>
       <Toolbar m={m} />
       {columns}
+      <Text backgroundColor={C.canvas}>{' '.repeat(m.at.width)}</Text>
     </Box>
   )
 }

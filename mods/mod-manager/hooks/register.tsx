@@ -216,8 +216,15 @@ function readmeOf(root: string, width: number): MdRow[] {
   return rows
 }
 
+const isOpen = async ($: EngineInterface) => (await $.ui.panes().catch(() => [])).some(p => p.id === PANE)
+
+// /mods toggles the pane; on and off say which; refresh reads the installed plugins again.
 async function command($: EngineInterface, args: string) {
-  const arg = args.trim()
+  const arg = args.trim().toLowerCase()
+  if (arg === 'off' || arg === 'close' || (arg === '' && (await isOpen($)))) {
+    await $.ui.close({ id: PANE }).catch(() => undefined)
+    return { text: `Closed. /${session.command} opens it again.` }
+  }
   if (arg === 'refresh') {
     await loadCatalog($)
     return { text: `${(await read($, entries)).length} plugins read.` }
@@ -235,7 +242,7 @@ export const register: Register = on => {
     session.self = $.plugin.name
     for (const name of ['mods', 'mod-manager']) {
       const ok = await $.command
-        .register({ name, description: 'Browse your installed mods, switch them on or off, open their panels', argumentHint: '[refresh]' })
+        .register({ name, description: 'Browse your installed mods, switch them on or off, open their panels', argumentHint: '[on | off | refresh]' })
         .then(() => true)
         .catch(() => false)
       if (ok) {
