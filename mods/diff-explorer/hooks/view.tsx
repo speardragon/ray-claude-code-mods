@@ -10,6 +10,7 @@ import { PreviewRow } from './rows'
 import type { VRow } from './rows'
 import { thumbOf } from './scrollbar'
 import type { BarProps } from './scrollbar'
+import type { SashProps } from './sash'
 import { pad, textWidth, truncate } from './text'
 import { C } from './theme'
 import type { TreeRow } from './tree'
@@ -65,10 +66,17 @@ const TREE_HEAD = 1 // the explorer's title row
 const PREVIEW_HEAD = 2 // the file's header and the rule under it
 const PREVIEW_FOOT = 1 // the status row under the preview
 const TREE_MIN_PANE = 72 // narrower panes hide the tree unless it is forced on
+export const TREE_MIN = 16 // the narrowest the explorer can be dragged
+const PREVIEW_MIN = 32 // the room a drag leaves the preview
 
-export function layout(width: number, height: number, tree: 'auto' | 'shown' | 'hidden', hasHbar: boolean): Layout {
+// The widest the explorer may be in a pane `width` cells across.
+export const treeMax = (width: number) => Math.max(TREE_MIN, width - 1 - PREVIEW_MIN)
+
+// `pref` is the width the person dragged the explorer to; null sizes it to the pane.
+export function layout(width: number, height: number, tree: 'auto' | 'shown' | 'hidden', hasHbar: boolean, pref: number | null = null): Layout {
   const showTree = tree === 'shown' || (tree === 'auto' && width >= TREE_MIN_PANE)
-  const treeWidth = showTree ? Math.max(20, Math.min(36, Math.round(width * 0.32))) : 0
+  const auto = Math.max(20, Math.min(36, Math.round(width * 0.32)))
+  const treeWidth = showTree ? Math.max(TREE_MIN, Math.min(treeMax(width), pref ?? auto)) : 0
   const previewWidth = showTree ? width - treeWidth - 1 : width
   const body = Math.max(1, height - TOOLBAR_ROWS)
   return {
@@ -248,11 +256,23 @@ function TreeColumn({ m }: { m: PaneModel }) {
   )
 }
 
+// The sash between the columns: a Client the pointer drags where the surface draws one, else a line.
 function Divider({ m }: { m: PaneModel }) {
-  const { Box, Text } = m.els
+  const { Box, Text, Client } = m.els
+  const height = m.at.treeBody + TREE_HEAD
+  if (Client) {
+    const props: SashProps = {
+      height,
+      treeWidth: m.at.treeWidth,
+      min: TREE_MIN,
+      max: treeMax(m.at.width),
+      colors: { line: C.border, hot: C.accent, bg: C.canvas },
+    }
+    return <Client key="sash" module="./sash.tsx" props={props} width={1} height={height} />
+  }
   return (
     <Box flexDirection="column" width={1}>
-      {Array.from({ length: m.at.treeBody + TREE_HEAD }, () => (
+      {Array.from({ length: height }, () => (
         <Text color={C.border} backgroundColor={C.canvas}>
           │
         </Text>

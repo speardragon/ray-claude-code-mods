@@ -285,3 +285,71 @@ test('/diffs toggles the pane; on and off say which', async ($, on) => {
   await run('off')
   expect(calls).toEqual(['open', 'close', 'open', 'close'])
 })
+
+test('the sash drags the explorer wider, keeps the width, and a double click resets it', async ($, on) => {
+  const files = new Map([['/repo/src/a.ts', 'one\n']])
+  const kept = new Map<string, unknown>([['treeWidth', 30]])
+  on('command.register', () => ({ value: { command: 'diffs' } }))
+  on('env.get', () => ({ value: '/home/me' }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('ui.panes', () => ({ value: [] }))
+  on('ui.toast', () => ({ value: undefined }))
+  on('store.get', (_, e) => ({ value: kept.get(e.key) }))
+  on('store.set', (_, e) => {
+    kept.set(e.key, e.value)
+    return { value: undefined }
+  })
+  on('store.delete', (_, e) => {
+    kept.delete(e.key)
+    return { value: undefined }
+  })
+  on('fs.read', (_, e) => {
+    const text = files.get(e.path)
+    if (text === undefined) throw new Error('ENOENT')
+    return { value: text }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('tool.call', (_, e) => {
+    const input = e as unknown as { file_path: string; content: string }
+    files.set(input.file_path, input.content)
+    return { result: {} }
+  })
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  const write = { tool: 'Write', file_path: '/repo/src/a.ts', content: 'two\n' } as const
+  const call = $.tool.call as unknown as (e: typeof write) => Promise<unknown>
+  await call(write)
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const explorerWidth = async () => (await ui.find({ type: 'Client', key: 'explorer' }))?.props.width
+  // The width kept from an earlier session: 30, the explorer's rows one cell narrower for its scrollbar.
+  expect(await explorerWidth()).toBe(29)
+
+  // Hovering lights the sash.
+  await ui.pointer({ type: 'enter', x: 0, y: 3, in: 'sash' })
+  expect((await ui.find({ type: 'Text', text: '┃', in: 'sash' }))?.props.color).toBe('#2f81f7')
+
+  await ui.pointer({ type: 'down', x: 0, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'move', x: 8, y: 3, button: 'left', in: 'sash' })
+  expect(await explorerWidth()).toBe(37)
+  await ui.pointer({ type: 'up', x: 0, y: 3, button: 'left', in: 'sash' })
+  expect(kept.get('treeWidth')).toBe(38)
+
+  // Dragged past the preview's room, it stops: 110 - 1 - 32.
+  await ui.pointer({ type: 'down', x: 0, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'move', x: 200, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'up', x: 0, y: 3, button: 'left', in: 'sash' })
+  expect(kept.get('treeWidth')).toBe(77)
+
+  // [ and ] nudge it from any of the pane's rows.
+  await ui.key({ key: '[', in: 'status' })
+  expect(kept.get('treeWidth')).toBe(75)
+
+  // A double click puts the default back and forgets the kept width.
+  await ui.pointer({ type: 'down', x: 0, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'up', x: 0, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'down', x: 0, y: 3, button: 'left', in: 'sash' })
+  await ui.pointer({ type: 'up', x: 0, y: 3, button: 'left', in: 'sash' })
+  expect(kept.has('treeWidth')).toBe(false)
+  expect(await explorerWidth()).toBe(34) // the default for 110 columns, less the scrollbar
+  await ui.unmount()
+})

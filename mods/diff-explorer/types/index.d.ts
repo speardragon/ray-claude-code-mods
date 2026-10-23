@@ -27,6 +27,7 @@ declare module 'claude-code' {
       tree: TreeMode
       collapsed: string[]
       scroll: Scroll
+      treeWidth: number | null // the explorer's width the person dragged it to; null follows the pane
       cwd: string
     }
   }

@@ -16,7 +16,7 @@ import type { VRow } from './rows'
 import { HOTKEYS } from './chrome'
 import type { Action } from './chrome'
 import { dropCells, expandTabs, textWidth } from './text'
-import { layout, Pane } from './view'
+import { layout, Pane, TREE_MIN, treeMax } from './view'
 import type { Entry, Handlers, Layout } from './view'
 
 const PANE = 'diff-explorer'
@@ -37,6 +37,10 @@ const tree = atom({ plugin: 'diff-explorer', key: 'tree' } as const, 'auto' as T
 const collapsed = atom({ plugin: 'diff-explorer', key: 'collapsed' } as const, [] as string[])
 const scroll = atom({ plugin: 'diff-explorer', key: 'scroll' } as const, { tree: 0, preview: 0, x: 0 } as Scroll)
 const cwd = atom({ plugin: 'diff-explorer', key: 'cwd' } as const, '')
+const treeWidth = atom({ plugin: 'diff-explorer', key: 'treeWidth' } as const, null as number | null)
+
+// The explorer width the person dragged to, kept across sessions.
+const WIDTH_KEY = 'treeWidth'
 
 // The module's own bookkeeping; a reload starts it over.
 const session = { home: '', command: 'diffs', isFullscreen: undefined as boolean | undefined, hasAutoOpened: false, pickedAt: 0 }
@@ -228,8 +232,21 @@ async function pressKey($: EngineInterface, element: string, key: string) {
   if (key === 'pageup') return actions($).up()
   if (key === 'pagedown') return actions($).down()
   if (key === 'left' || key === 'right') return scrollBy($, 'x', key === 'left' ? -4 : 4)
+  if (key === '[' || key === ']') return resizeBy($, key === '[' ? -2 : 2)
   return undefined
 }
+
+// The explorer's width: a number the person chose (kept in the store once settled), or null for the default.
+async function resizeTo($: EngineInterface, width: number | null, isDone: boolean) {
+  const at = drawn.layout
+  const next = width === null || !at ? width : Math.max(TREE_MIN, Math.min(treeMax(at.width), Math.round(width)))
+  await update($, treeWidth, () => next)
+  if (!isDone) return
+  if (next === null) await $.store.delete(WIDTH_KEY).catch(() => undefined)
+  else await $.store.set(WIDTH_KEY, next).catch(() => undefined)
+}
+
+const resizeBy = ($: EngineInterface, by: number) => resizeTo($, (drawn.layout?.treeWidth ?? 28) + by, true)
 
 const isOpen = async ($: EngineInterface) => (await $.ui.panes().catch(() => [])).some(p => p.id === PANE)
 
@@ -263,6 +280,8 @@ export const register: Register = (on, options) => {
     const r = await next(e)
     session.home = (await $.env.get('HOME').catch(() => undefined)) ?? ''
     await update($, cwd, () => e.cwd)
+    const kept = await $.store.get(WIDTH_KEY).catch(() => undefined)
+    if (typeof kept === 'number') await update($, treeWidth, () => kept)
     // /diffs, or /diff-explorer if a built-in or another plugin ever takes /diffs.
     for (const name of ['diffs', 'diff-explorer']) {
       const ok = await $.command
@@ -312,6 +331,11 @@ export const register: Register = (on, options) => {
       await actions($)[data.action as Action]()
       return {}
     }
+    if (e.element === 'sash') {
+      const message = e.data as { width?: unknown; isDone?: unknown } | null
+      if (typeof message?.width === 'number' || message?.width === null) await resizeTo($, message.width, message.isDone === true)
+      return {}
+    }
     if (e.element === 'explorer') {
       const message = e.data as { type?: unknown; key?: unknown } | null
       if (typeof message?.key !== 'string') return {}
@@ -340,7 +364,7 @@ export const register: Register = (on, options) => {
     const root = (await read($, cwd)) || '/'
     const isWrapped = await read($, wrap)
     const mode = await read($, view)
-    const at = layout(e.props.bodyColumns, e.props.scroll.bodyRows, await read($, tree), mode === 'file' || !isWrapped)
+    const at = layout(e.props.bodyColumns, e.props.scroll.bodyRows, await read($, tree), mode === 'file' || !isWrapped, await read($, treeWidth))
     const offsets = await read($, scroll)
 
     const known = await entriesOf($, list, root)

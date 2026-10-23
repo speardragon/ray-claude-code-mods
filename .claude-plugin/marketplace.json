@@ -8,7 +8,7 @@
     {
       "name": "diff-explorer",
       "description": "A VS Code-style side panel for the files Claude changes: a file tree with Material-style icons and a GitHub-dark diff preview. /diffs opens it.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "source": "./mods/diff-explorer",
       "category": "See what's happening",
       "tags": [

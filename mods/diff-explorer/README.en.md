@@ -36,6 +36,7 @@ the terminal.
 | `/diffs clear` | | Forgets what was tracked (files as they are now become the baseline) |
 | `t` | Toolbar `Explorer` | Shows or hides the explorer |
 | `c` | Right of the explorer's title | Collapses or expands every folder |
+| `[` / `]` | The line between the explorer and the preview | Narrows or widens the explorer. Drag the line to resize it, double-click it for the default width (the width you set is kept for later sessions) |
 | `p` / `n` | File header `‹` `›` | Previous / next file |
 | `v` | Status row `Diff │ File` | Diff ↔ whole file |
 | `w` | Status row `Wrap` | Wraps long lines, or not |
