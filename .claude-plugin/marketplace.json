@@ -52,6 +52,19 @@
         "command",
         "markdown"
       ]
+    },
+    {
+      "name": "tool-fold",
+      "description": "Each tool call as one quiet line, its result folded away (click to unfold); /tools panel lists every call beside the chat, each in a view that suits its tool (MongoDB in Compass style, images as pictures). /tools toggles it.",
+      "version": "0.4.0",
+      "source": "./mods/tool-fold",
+      "category": "Read better",
+      "tags": [
+        "render",
+        "pane",
+        "command",
+        "tools"
+      ]
     }
   ]
 }

@@ -6,7 +6,7 @@
 // inside a terminal window and photographed by headless Chrome.
 //   node scripts/shots/render.mjs [mod ...]
 import { execFileSync, spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
@@ -41,19 +41,37 @@ const DIM = '#7d8590'
 
 // ---- capture ------------------------------------------------------------------------------
 
-function capture(mod) {
-  const fixture = join(root, 'scripts/shots', `${mod}.shot.tsx`)
+// A fixture that reads globalThis.__SHOT_INDEX__ is run once per shot (the test kit cuts a long
+// output short, and each shot carries its whole drawing); any other runs once for all its shots.
+function runFixture(mod, source) {
   const work = mkdtempSync(join(tmpdir(), `shot-${mod}-`))
   cpSync(join(root, 'mods', mod), join(work, mod), { recursive: true, filter: src => !src.includes('/.claude-plugin/types') })
   rmSync(join(work, mod, 'tests'), { recursive: true, force: true })
   mkdirSync(join(work, mod, 'tests'))
-  cpSync(fixture, join(work, mod, 'tests', 'shot.test.tsx'))
+  writeFileSync(join(work, mod, 'tests', 'shot.test.tsx'), source)
   const run = spawnSync('claude', ['plugin', 'test', join(work, mod)], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
   rmSync(work, { recursive: true, force: true })
   const text = `${run.stdout}${run.stderr}`
-  const shots = [...text.matchAll(/@@SHOT@@([\s\S]*?)@@END@@/g)].map(m => JSON.parse(m[1]))
-  if (shots.length === 0) throw new Error(`${mod}: the fixture drew nothing\n${text.slice(0, 4000)}`)
-  return shots
+  return { shots: [...text.matchAll(/@@SHOT@@([\s\S]*?)@@END@@/g)].map(m => JSON.parse(m[1])), text }
+}
+
+function capture(mod) {
+  const fixture = readFileSync(join(root, 'scripts/shots', `${mod}.shot.tsx`), 'utf8')
+  if (!fixture.includes('__SHOT_INDEX__')) {
+    const { shots, text } = runFixture(mod, fixture)
+    if (shots.length === 0) throw new Error(`${mod}: the fixture drew nothing\n${text.slice(0, 4000)}`)
+    return shots
+  }
+  const all = []
+  for (let k = 0; k < 50; k++) {
+    const { shots, text } = runFixture(mod, `;(globalThis as Record<string, unknown>).__SHOT_INDEX__ = ${k}\n${fixture}`)
+    if (shots.length === 0) {
+      if (k === 0) throw new Error(`${mod}: the fixture drew nothing\n${text.slice(0, 4000)}`)
+      break
+    }
+    all.push(...shots)
+  }
+  return all
 }
 
 // ---- layout as HTML -----------------------------------------------------------------------

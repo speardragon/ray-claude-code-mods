@@ -1,0 +1,18 @@
+{
+  "name": "tool-fold",
+  "version": "0.4.0",
+  "description": "Each tool call as one quiet line, its result folded away (click to unfold); /tools panel lists every call beside the chat, each in a view that suits its tool (MongoDB in Compass style). /tools toggles it.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "yieldExpanded": {
+      "type": "boolean",
+      "title": "Leave expanded views to the engine",
+      "default": false,
+      "description": "Draw tool calls the engine's way where it shows them in full: the ctrl+o transcript and verbose mode. Off folds them there too."
+    }
+  }
+}

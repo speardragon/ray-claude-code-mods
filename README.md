@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-mods-d97757.svg" alt="Claude Code mods">
-  <img src="https://img.shields.io/badge/mods-4-3fb950.svg" alt="4 mods">
+  <img src="https://img.shields.io/badge/mods-5-3fb950.svg" alt="5 mods">
 </p>
 
 <p align="center">
@@ -27,6 +27,7 @@
 | 💬 | [**prompt-history**](mods/prompt-history) | 이번 세션에 보낸 프롬프트를 시간과 함께 모아 보고, 클릭 한 번으로 그 위치로 돌아갑니다. | `/prompts` |
 | 🧩 | [**mod-manager**](mods/mod-manager) | 설치한 mod를 한 곳에서 둘러보고, 켜고 끄고, 각 mod의 패널을 바로 엽니다. | `/mods` |
 | 📖 | [**readability**](mods/readability) | Claude의 응답을 읽기 편하게 다시 그립니다. 스트리밍 중에도, 끝날 때 레이아웃이 튀지 않게. | `/readability` |
+| 🗜️ | [**tool-fold**](mods/tool-fold) | 도구 호출을 한 줄씩, 결과는 접어 두고 클릭하면 펼치기. `/tools panel`로 도구별 상세 패널(MongoDB는 Compass 스타일, 이미지는 그림 그대로). | `/tools` |
 
 ## 🚀 설치
 
@@ -37,6 +38,7 @@ Claude Code 프롬프트에 붙여 넣으세요. 마켓플레이스를 추가할
 /plugin install prompt-history --marketplace speardragon/ray-claude-code-mods
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
 /plugin install readability --marketplace speardragon/ray-claude-code-mods
+/plugin install tool-fold --marketplace speardragon/ray-claude-code-mods
 ```
 
 <details>
@@ -48,6 +50,7 @@ claude plugin install diff-explorer@ray-claude-code-mods
 claude plugin install prompt-history@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
 claude plugin install readability@ray-claude-code-mods
+claude plugin install tool-fold@ray-claude-code-mods
 ```
 
 데스크톱 앱에서는 프롬프트 옆 `+` → **Plugins** → **Add marketplace**에 `speardragon/ray-claude-code-mods`를 넣고, **Add plugin**으로 고르세요.
@@ -110,6 +113,22 @@ claude plugin install readability@ray-claude-code-mods
 - `/readability`로 켜고 끄기(다음 세션에도 유지).
 
 [자세히 보기 →](mods/readability)
+
+## 🗜️ tool-fold
+
+> 도구 호출은 한 줄로. 궁금한 것만 펼쳐 보기.
+
+<img src="images/tool-fold.png" alt="tool-fold" width="100%">
+
+- **한 줄 요약**: 상태 점, 도구, 대상(명령 · 경로), 결과 요약(출력 줄 수, `+추가 −삭제`, 에러 첫 줄).
+- **클릭해서 펼치기**: 줄을 누르면 엔진의 원래 결과 블록이 그 아래에. `/tools expand` · `collapse`로 한꺼번에.
+- **패널 모드**: `/tools panel`로 옆에 호출 목록과 도구별 상세 화면. MongoDB MCP는 Compass처럼 쿼리 바와 문서 카드로, 읽은 이미지는 그림 그대로.
+
+  <img src="images/tool-fold-panel-mongo.png" alt="tool-fold 패널" width="100%">
+
+- `/tools`로 켜고 끄기(다음 세션에도 유지).
+
+[자세히 보기 →](mods/tool-fold)
 
 ---
 
