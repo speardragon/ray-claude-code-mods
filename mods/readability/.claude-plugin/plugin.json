@@ -1,0 +1,19 @@
+{
+  "name": "readability",
+  "version": "0.2.1",
+  "description": "Claude's replies drawn for reading: calm body text, clear headings, highlighted code blocks, real tables. Styled as they stream, without reflowing when they finish. /readability toggles it.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "maxColumns": {
+      "type": "number",
+      "title": "Max line width",
+      "default": 100,
+      "min": 0,
+      "description": "Wrap replies at most this many columns wide (100 by default) for an easier read in a wide terminal. 0 uses the whole width."
+    }
+  }
+}

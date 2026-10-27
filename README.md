@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-mods-d97757.svg" alt="Claude Code mods">
-  <img src="https://img.shields.io/badge/mods-3-3fb950.svg" alt="3 mods">
+  <img src="https://img.shields.io/badge/mods-4-3fb950.svg" alt="4 mods">
 </p>
 
 <p align="center">
@@ -26,6 +26,7 @@
 | 🗂️ | [**diff-explorer**](mods/diff-explorer) | Claude가 수정한 파일을 VS Code처럼 트리로 모으고, 고른 파일의 diff를 GitHub 다크 톤으로 보여줍니다. | `/diffs` |
 | 💬 | [**prompt-history**](mods/prompt-history) | 이번 세션에 보낸 프롬프트를 시간과 함께 모아 보고, 클릭 한 번으로 그 위치로 돌아갑니다. | `/prompts` |
 | 🧩 | [**mod-manager**](mods/mod-manager) | 설치한 mod를 한 곳에서 둘러보고, 켜고 끄고, 각 mod의 패널을 바로 엽니다. | `/mods` |
+| 📖 | [**readability**](mods/readability) | Claude의 응답을 읽기 편하게 다시 그립니다. 스트리밍 중에도, 끝날 때 레이아웃이 튀지 않게. | `/readability` |
 
 ## 🚀 설치
 
@@ -35,6 +36,7 @@ Claude Code 프롬프트에 붙여 넣으세요. 마켓플레이스를 추가할
 /plugin install diff-explorer --marketplace speardragon/ray-claude-code-mods
 /plugin install prompt-history --marketplace speardragon/ray-claude-code-mods
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
+/plugin install readability --marketplace speardragon/ray-claude-code-mods
 ```
 
 <details>
@@ -45,6 +47,7 @@ claude plugin marketplace add speardragon/ray-claude-code-mods
 claude plugin install diff-explorer@ray-claude-code-mods
 claude plugin install prompt-history@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
+claude plugin install readability@ray-claude-code-mods
 ```
 
 데스크톱 앱에서는 프롬프트 옆 `+` → **Plugins** → **Add marketplace**에 `speardragon/ray-claude-code-mods`를 넣고, **Add plugin**으로 고르세요.
@@ -94,6 +97,19 @@ claude plugin install mod-manager@ray-claude-code-mods
 - **Mods / All**: hooks 모듈이 있는 mod만, 또는 스킬·MCP 플러그인까지 전부.
 
 [자세히 보기 →](mods/mod-manager)
+
+## 📖 readability
+
+> 긴 응답도 편하게. 색과 강조는 더하고, 줄 흐름은 그대로.
+
+<img src="images/readability.png" alt="readability" width="100%">
+
+- **차분한 본문, 단계별 제목, 눈에 띄는 인라인 코드와 링크**.
+- **코드 블록 패널과 구문 강조, 테두리 있는 표, 색이 다른 중첩 목록**.
+- **스트리밍 중에도 같은 모습**: 미완성 마크다운도 안전하게 그리고, 끝나는 순간 줄이 튀지 않아요.
+- `/readability`로 켜고 끄기(다음 세션에도 유지).
+
+[자세히 보기 →](mods/readability)
 
 ---
 

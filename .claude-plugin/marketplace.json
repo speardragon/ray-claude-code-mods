@@ -40,6 +40,18 @@
         "command",
         "history"
       ]
+    },
+    {
+      "name": "readability",
+      "description": "Claude's replies drawn for reading: calm body text, clear headings, highlighted code blocks, real tables. Styled as they stream, without reflowing when they finish. /readability toggles it.",
+      "version": "0.2.1",
+      "source": "./mods/readability",
+      "category": "Read better",
+      "tags": [
+        "render",
+        "command",
+        "markdown"
+      ]
     }
   ]
 }

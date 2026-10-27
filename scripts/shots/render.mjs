@@ -34,7 +34,7 @@ function symbolsFont() {
   return font
 }
 
-const CELL_W = 8.4 // px per column at 14px Meslo
+const CELL_W = 8.43 // px per column at 14px Meslo (its advance is 0.602em)
 const CELL_H = 18 // px per row
 const FG = '#c9d1d9'
 const DIM = '#7d8590'
@@ -60,7 +60,9 @@ function capture(mod) {
 
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-const isWide = cp =>
+const EMOJI = /\p{Emoji_Presentation}/u
+const isWide = (cp, ch = String.fromCodePoint(cp)) =>
+  EMOJI.test(ch) ||
   (cp >= 0x1100 && cp <= 0x115f) || (cp >= 0x2e80 && cp <= 0xa4cf) || (cp >= 0xac00 && cp <= 0xd7a3) ||
   (cp >= 0xf900 && cp <= 0xfaff) || (cp >= 0xfe30 && cp <= 0xfe4f) || (cp >= 0xff00 && cp <= 0xff60) ||
   (cp >= 0x1f300 && cp <= 0x1faff)
@@ -71,7 +73,7 @@ function cells(text) {
   let html = ''
   for (const ch of text) {
     const cp = ch.codePointAt(0)
-    if (isWide(cp)) html += `<i class="w2">${esc(ch)}</i>`
+    if (isWide(cp, ch)) html += `<i class="${EMOJI.test(ch) ? 'em' : 'w2'}">${esc(ch)}</i>`
     else if (isGlyph(cp)) html += `<i class="nf">${esc(ch)}</i>`
     else if (cp > 0x2000) html += `<i class="w1">${esc(ch)}</i>`
     else html += esc(ch)
@@ -176,6 +178,7 @@ function page(shot, symbols) {
   .line { height: ${CELL_H}px; white-space: pre; overflow: hidden; flex-shrink: 0; }
   i { font-style: normal; display: inline-block; text-align: center; overflow: visible; }
   i.w1 { width: ${CELL_W}px; }
+  i.em { width: ${CELL_W * 2}px; font-size: 13px; }
   i.nf { width: ${CELL_W}px; font-family: NerdSymbols; font-size: 12px; vertical-align: top; }
   i.w2 { width: ${CELL_W * 2}px; font-family: "Apple SD Gothic Neo", sans-serif; font-size: 16.5px; letter-spacing: -0.5px; }
   .pane { width: ${paneW}px; height: ${paneH}px; overflow: hidden; }

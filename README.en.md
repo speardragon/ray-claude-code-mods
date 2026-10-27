@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-mods-d97757.svg" alt="Claude Code mods">
-  <img src="https://img.shields.io/badge/mods-3-3fb950.svg" alt="3 mods">
+  <img src="https://img.shields.io/badge/mods-4-3fb950.svg" alt="4 mods">
 </p>
 
 <p align="center">
@@ -26,6 +26,7 @@
 | 🗂️ | [**diff-explorer**](mods/diff-explorer/README.en.md) | Collects the files Claude changes into a VS Code-style tree and shows the picked one's diff in GitHub dark. | `/diffs` |
 | 💬 | [**prompt-history**](mods/prompt-history/README.en.md) | Lists the prompts you sent this session with when you sent them; one click takes you back to one. | `/prompts` |
 | 🧩 | [**mod-manager**](mods/mod-manager/README.en.md) | Browse your installed mods in one place, switch them on and off, open their panels. | `/mods` |
+| 📖 | [**readability**](mods/readability/README.en.md) | Draws Claude's replies for reading: while they stream, and without a jolt when they end. | `/readability` |
 
 ## 🚀 Install
 
@@ -35,6 +36,7 @@ Paste this at the Claude Code prompt, and answer `y` when it asks to add the mar
 /plugin install diff-explorer --marketplace speardragon/ray-claude-code-mods
 /plugin install prompt-history --marketplace speardragon/ray-claude-code-mods
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
+/plugin install readability --marketplace speardragon/ray-claude-code-mods
 ```
 
 <details>
@@ -45,6 +47,7 @@ claude plugin marketplace add speardragon/ray-claude-code-mods
 claude plugin install diff-explorer@ray-claude-code-mods
 claude plugin install prompt-history@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
+claude plugin install readability@ray-claude-code-mods
 ```
 
 In the desktop app: click `+` beside the prompt → **Plugins** → **Add marketplace** with `speardragon/ray-claude-code-mods`, then **Add plugin**.
@@ -94,6 +97,19 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 - **Mods / All**: just the plugins with a hooks module, or every plugin, skills and MCP included.
 
 [More →](mods/mod-manager/README.en.md)
+
+## 📖 readability
+
+> Long replies, easy to read. Color and emphasis added, the flow kept.
+
+<img src="images/readability.png" alt="readability" width="100%">
+
+- **Calm body text, headings by level, inline code and links that stand out**.
+- **Code blocks on a panel with syntax colors, bordered tables, lists colored by depth**.
+- **The same look while streaming**: unfinished markdown draws safely, and nothing jumps when the reply ends.
+- `/readability` toggles it (remembered across sessions).
+
+[More →](mods/readability/README.en.md)
 
 ---
 
