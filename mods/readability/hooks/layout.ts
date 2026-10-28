@@ -211,22 +211,21 @@ export function layoutBlocks(blocks: Block[], width: number, depth = 0): Line[] 
         break
       }
       case 'list': {
-        // A loose list (an item of several paragraphs) keeps a blank line between items; a nested
-        // list sits right under its item's text, as the engine draws it.
-        const isLoose = block.items.some(item => item.blocks.filter(b => b.kind !== 'list').length > 1)
+        // Every item, at any depth, keeps a blank line from the one before it, as does a nested
+        // list from its item's text.
         block.items.forEach((item, n) => {
-          if (n > 0 && isLoose) out.push([])
+          if (n > 0) out.push([])
           const marker = block.ordered
             ? span(`${item.marker} `.padStart(Math.max(...block.items.map(it => it.marker.length)) + 1), { color: T.number, weight: 'bold' })
             : item.task === 'done'
-              ? span('☑ ', { color: T.done })
+              ? span(`${T.checked} `, { color: T.done })
               : item.task === 'todo'
-                ? span('☐ ', { color: T.muted })
-                : span('• ', { color: T.bullet[depth % T.bullet.length] })
+                ? span(`${T.unchecked} `, { color: T.muted })
+                : span(`${T.bulletMark} `, { color: T.bullet[depth % T.bullet.length] })
           const indent = span(' '.repeat(textWidth(marker.text)), {})
           const room = width - textWidth(marker.text)
-          const inner = item.blocks.flatMap((b, k) => [...(k > 0 && b.kind !== 'list' ? [[] as Line] : []), ...layoutBlocks([b], room, depth + 1)])
-          inner.forEach((line, k) => out.push([k === 0 ? marker : indent, ...line]))
+          const inner = item.blocks.flatMap((b, k) => [...(k > 0 ? [[] as Line] : []), ...layoutBlocks([b], room, depth + 1)])
+          inner.forEach((line, k) => out.push(k > 0 && line.length === 0 ? [] : [k === 0 ? marker : indent, ...line]))
           if (inner.length === 0) out.push([marker])
         })
         break

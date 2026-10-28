@@ -25,6 +25,9 @@ export const T = {
   quoteText: '#d1d7e0',
   quoteBg: '#131a24',
   bullet: ['#79c0ff', '#d2a8ff', '#7ee787'],
+  bulletMark: '•',
+  checked: '󰄲', // Nerd Font md-checkbox_marked
+  unchecked: '󰄱', // Nerd Font md-checkbox_blank_outline
   number: '#79c0ff',
   done: '#3fb950',
   heading: ['#f0f6fc', '#79c0ff', '#d2a8ff', '#ffa657', '#7ee787', '#8b949e'],

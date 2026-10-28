@@ -42,6 +42,11 @@ describe('layout', () => {
     expect(lines[3]!.startsWith('  ')).toBe(true)
   })
 
+  test('items sit a blank line apart at every depth', async () => {
+    const lines = plain(layoutBlocks(parseBlocks('- one\n  - inner\n- two\n- [ ] todo\n- [x] done'), 40))
+    expect(lines).toEqual(['• one', '', '  • inner', '', '• two', '', '\u{f0131} todo', '', '\u{f0132} done'])
+  })
+
   test('emoji count two cells, so a table with ✅ keeps its columns', async () => {
     expect(textWidth('✅ 완료')).toBe(7)
     const lines = plain(layoutBlocks(parseBlocks('| a | b |\n| --- | --- |\n| ✅ x | y |\n| plain | z |'), 40))

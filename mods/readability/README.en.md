@@ -28,7 +28,8 @@ It fixes the two things that bothered me about [glamour-dark](https://github.com
   Go, Rust, shell, JSON, YAML…)
 - **Tables**: bright borders, a bold header on blue over a double rule, alignment (`:---:`), cells wrapped to fit; emoji like `✅` count two cells so
   columns stay aligned
-- **Lists**: `•` colored by depth, aligned numbers, `☐` `☑` checkboxes, hanging indents
+- **Lists**: `•` colored by depth, aligned numbers, Nerd Font checkboxes `󰄱` `󰄲` (broken glyphs without a Nerd Font),
+  hanging indents, a blank line between items
 - **Quotes**: a blue `▌` bar, the whole line on a faint tint, clear text
 
 ## Install
