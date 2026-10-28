@@ -48,7 +48,7 @@ describe('layout', () => {
     const widths = new Set(lines.map(textWidth))
     expect(widths.size).toBe(1)
     // top, header, rule, row, rule between rows, row, bottom
-    expect(lines.map(l => l[0])).toEqual(['┌', '│', '├', '│', '├', '│', '└'])
+    expect(lines.map(l => l[0])).toEqual(['┌', '│', '╞', '│', '├', '│', '└'])
   })
 
   test('headings carry their level in #s; code sits in a frame', async () => {

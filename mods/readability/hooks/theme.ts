@@ -19,10 +19,11 @@ export const T = {
   code: '#ffa657',
   codeBg: '#1c2128',
   blockBg: '#161b22',
-  rule: '#6e7681',
-  hash: '#6e7681', // a heading's # marks
+  rule: '#8b949e',
   box: '#6e7681', // a code block's frame
-  quoteBar: '#3d444d',
+  quoteBar: '#58a6ff', // a quote's bar, and its tinted lines
+  quoteText: '#d1d7e0',
+  quoteBg: '#131a24',
   bullet: ['#79c0ff', '#d2a8ff', '#7ee787'],
   number: '#79c0ff',
   done: '#3fb950',
@@ -39,5 +40,6 @@ export const T = {
     key: '#7ee787',
   },
   tableBorder: '#8b949e',
-  tableHead: '#f0f6fc',
+  tableHead: '#ffffff',
+  tableHeadBg: '#264166', // the header row's cells, so it reads apart from the body
 } as const

@@ -107,11 +107,12 @@ const span = (text: string, paint: Paint): Span => ({ text, paint })
 function heading(level: number, inline: Inline[], width: number): Line[] {
   const color = T.heading[Math.min(level, 6) - 1]!
   const paint: Paint = { color, weight: 'bold' }
-  const hashes = span(`${'#'.repeat(level)} `, { color: T.hash, weight: 'bold' })
+  // The # marks and the underline take the heading's own color, so the level reads at a glance.
+  const hashes = span(`${'#'.repeat(level)} `, { color, weight: 'bold' })
   const lines = wrap(spansOf(inline, paint), width, [hashes], [span(' '.repeat(level + 1), {})])
   const textWide = Math.max(...lines.map(l => l.reduce((n, s) => n + textWidth(s.text), 0)))
   if (level === 1) lines.push([span('━'.repeat(Math.max(8, width)), { color })])
-  if (level === 2) lines.push([span('─'.repeat(Math.min(width, Math.max(8, textWide))), { color: T.rule })])
+  if (level === 2) lines.push([span('─'.repeat(Math.min(width, Math.max(8, textWide))), { color })])
   return lines
 }
 
@@ -156,26 +157,28 @@ function table(block: Extract<Block, { kind: 'table' }>, width: number): Line[] 
     if (widths[widest]! <= 4) break
     widths[widest]!--
   }
-  const border = (l: string, m: string, r: string) => [span(l + widths.map(w => '─'.repeat(w + 2)).join(m) + r, { color: T.tableBorder })]
-  const row = (cells: Span[][]): Line[] => {
+  const border = (l: string, m: string, r: string, ch = '─') => [span(l + widths.map(w => ch.repeat(w + 2)).join(m) + r, { color: T.tableBorder })]
+  // `bg` tints a row's cells (the header's), leaving the borders and any span's own background.
+  const row = (cells: Span[][], bg?: string): Line[] => {
+    const fill: Paint = bg ? { backgroundColor: bg } : {}
     const wrapped = cells.map((cell, i) => wrap(cell, widths[i]!))
     const height = Math.max(1, ...wrapped.map(w => w.length))
     return Array.from({ length: height }, (_, y) => {
       const line: Line = [span('│', { color: T.tableBorder })]
       wrapped.forEach((cell, i) => {
-        const content = cell[y] ?? []
+        const content = (cell[y] ?? []).map(s => (bg && !s.paint.backgroundColor ? { ...s, paint: { ...s.paint, ...fill } } : s))
         const used = content.reduce((n, s) => n + textWidth(s.text), 0)
         const gap = widths[i]! - used
         const align = block.align[i] ?? 'left'
         const left = align === 'right' ? gap : align === 'center' ? Math.floor(gap / 2) : 0
-        line.push(span(' '.repeat(1 + left), {}), ...content, span(' '.repeat(1 + gap - left), {}), span('│', { color: T.tableBorder }))
+        line.push(span(' '.repeat(1 + left), fill), ...content, span(' '.repeat(1 + gap - left), fill), span('│', { color: T.tableBorder }))
       })
       return line
     })
   }
-  // A rule under the header and between every body row, so a row that wraps reads as one.
+  // A tinted header over a double rule, and a rule between every body row, so a row that wraps reads as one.
   const between = border('├', '┼', '┤')
-  return [border('┌', '┬', '┐'), ...row(head), between, ...rows.flatMap((r, i) => [...(i > 0 ? [between] : []), ...row(r)]), border('└', '┴', '┘')]
+  return [border('┌', '┬', '┐'), ...row(head, T.tableHeadBg), border('╞', '╪', '╡', '═'), ...rows.flatMap((r, i) => [...(i > 0 ? [between] : []), ...row(r)]), border('└', '┴', '┘')]
 }
 
 export function layoutBlocks(blocks: Block[], width: number, depth = 0): Line[] {
@@ -196,9 +199,14 @@ export function layoutBlocks(blocks: Block[], width: number, depth = 0): Line[] 
         out.push([span('─'.repeat(Math.max(4, width)), { color: T.rule })])
         break
       case 'quote': {
-        const bar = span('▌ ', { color: T.quoteBar })
-        for (const line of layoutBlocks(block.blocks, width - 2, depth)) {
-          out.push([bar, ...line.map(s => ({ ...s, paint: { ...s.paint, color: s.paint.color === T.text ? T.muted : s.paint.color, italic: true } }))])
+        // A bright bar and a faint tint across the width, the text a step softer than the body's but
+        // upright: italics read poorly in many terminal fonts.
+        const bg = { backgroundColor: T.quoteBg }
+        const bar = span('▌ ', { color: T.quoteBar, ...bg })
+        for (const line of layoutBlocks(block.blocks, width - 3, depth)) {
+          const body = line.map(s => ({ ...s, paint: { ...s.paint, ...(s.paint.color === T.text ? { color: T.quoteText } : {}), ...(s.paint.backgroundColor ? {} : bg) } }))
+          const used = 2 + body.reduce((n, s) => n + textWidth(s.text), 0)
+          out.push([bar, ...body, span(' '.repeat(Math.max(1, width - used)), bg)])
         }
         break
       }

@@ -22,14 +22,14 @@ It fixes the two things that bothered me about [glamour-dark](https://github.com
 
 - **Body**: crisp white (`#f0f6fc`), wrapping at words (anywhere in Hangul and CJK), brighter bold, italic, strikethrough
 - **Headings**: a terminal has one type size, so a heading carries its level in `#`s, H1 a heavy rule across the width
-  and H2 a light one under its text
+  and H2 a light one under its text, marks and rules in the heading's own color
 - **Inline code · links**: orange on a faint background / blue and underlined (clickable)
 - **Code blocks**: a rounded frame with the language in its top edge, a background panel, syntax colors (TS/JS, Python,
   Go, Rust, shell, JSON, YAML…)
-- **Tables**: bright borders, a bold header, alignment (`:---:`), cells wrapped to fit; emoji like `✅` count two cells so
+- **Tables**: bright borders, a bold header on blue over a double rule, alignment (`:---:`), cells wrapped to fit; emoji like `✅` count two cells so
   columns stay aligned
 - **Lists**: `•` colored by depth, aligned numbers, `☐` `☑` checkboxes, hanging indents
-- **Quotes**: a `▌` bar and dim italics
+- **Quotes**: a blue `▌` bar, the whole line on a faint tint, clear text
 
 ## Install
 
