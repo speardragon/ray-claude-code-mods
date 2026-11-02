@@ -91,7 +91,7 @@ export const register: Register = (on, options) => {
     if (typeof stored === 'boolean') await update($, enabled, () => stored)
     for (const name of ['tools', 'tool-fold']) {
       const ok = await $.command
-        .register({ name, description: 'Fold tool calls to one line, or not; expand or collapse them all', argumentHint: '[on | off | panel | expand | collapse | stats]' })
+        .register({ name, description: 'Fold tool calls to one line, or not; expand or collapse them all', argumentHint: '[on | off | panel | expand | collapse | stats]', immediate: true })
         .then(() => true)
         .catch(() => false)
       if (ok) {

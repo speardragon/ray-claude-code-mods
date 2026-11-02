@@ -285,7 +285,7 @@ export const register: Register = (on, options) => {
     // /diffs, or /diff-explorer if a built-in or another plugin ever takes /diffs.
     for (const name of ['diffs', 'diff-explorer']) {
       const ok = await $.command
-        .register({ name, description: 'Show the files Claude changed, as a tree with their diffs', argumentHint: '[on | off | clear]' })
+        .register({ name, description: 'Show the files Claude changed, as a tree with their diffs', argumentHint: '[on | off | clear]', immediate: true })
         .then(() => true)
         .catch(() => false)
       if (ok) {

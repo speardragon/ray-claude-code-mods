@@ -242,7 +242,7 @@ export const register: Register = on => {
     session.self = $.plugin.name
     for (const name of ['mods', 'mod-manager']) {
       const ok = await $.command
-        .register({ name, description: 'Browse your installed mods, switch them on or off, open their panels', argumentHint: '[on | off | refresh]' })
+        .register({ name, description: 'Browse your installed mods, switch them on or off, open their panels', argumentHint: '[on | off | refresh]', immediate: true })
         .then(() => true)
         .catch(() => false)
       if (ok) {

@@ -220,7 +220,7 @@ export const register: Register = (on, options) => {
     const r = await next(e)
     for (const name of ['prompts', 'prompt-history']) {
       const ok = await $.command
-        .register({ name, description: 'List the prompts you sent this session; jump back to one', argumentHint: '[on | off | number]' })
+        .register({ name, description: 'List the prompts you sent this session; jump back to one', argumentHint: '[on | off | number]', immediate: true })
         .then(() => true)
         .catch(() => false)
       if (ok) {

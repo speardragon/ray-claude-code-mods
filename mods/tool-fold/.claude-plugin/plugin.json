@@ -1,6 +1,6 @@
 {
   "name": "tool-fold",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Each tool call as one quiet line, its result folded away (click to unfold); /tools panel lists every call beside the chat, each in a view that suits its tool (MongoDB in Compass style). /tools toggles it.",
   "author": {
     "name": "Ray Kang"

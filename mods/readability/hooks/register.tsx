@@ -88,7 +88,7 @@ export const register: Register = (on, options) => {
     if (typeof stored === 'boolean') await update($, enabled, () => stored)
     for (const name of ['readability', 'readable']) {
       const ok = await $.command
-        .register({ name, description: 'Turn readable replies on or off', argumentHint: '[on | off | stats]' })
+        .register({ name, description: 'Turn readable replies on or off', argumentHint: '[on | off | stats]', immediate: true })
         .then(() => true)
         .catch(() => false)
       if (ok) {
