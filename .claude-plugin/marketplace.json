@@ -18,6 +18,18 @@
       ]
     },
     {
+      "name": "link-list",
+      "description": "Every link in Claude's replies, listed beside the chat with its favicon; click one to open it. /links opens it.",
+      "version": "0.1.0",
+      "source": "./mods/link-list",
+      "category": "See what's happening",
+      "tags": [
+        "pane",
+        "command",
+        "links"
+      ]
+    },
+    {
       "name": "mod-manager",
       "description": "Your installed Claude Code mods in one pane: browse them with their READMEs, switch each on or off, and open their panels. /mods opens it.",
       "version": "0.3.0",
@@ -44,7 +56,7 @@
     {
       "name": "readability",
       "description": "Claude's replies drawn for reading: calm body text, clear headings, highlighted code blocks, real tables. Styled as they stream, without reflowing when they finish. /readability toggles it.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "source": "./mods/readability",
       "category": "Read better",
       "tags": [

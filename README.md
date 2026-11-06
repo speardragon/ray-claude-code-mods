@@ -24,6 +24,7 @@
 | | Mod | 하는 일 | 여는 명령 |
 | --- | --- | --- | --- |
 | 🗂️ | [**diff-explorer**](mods/diff-explorer) | Claude가 수정한 파일을 VS Code처럼 트리로 모으고, 고른 파일의 diff를 GitHub 다크 톤으로 보여줍니다. | `/diffs` |
+| 🔗 | [**link-list**](mods/link-list) | Claude 답변에 나온 링크를 파비콘과 함께 모아 보고, 클릭 한 번으로 엽니다. readability가 본문에 붙이는 번호와 같아요. | `/links` |
 | 💬 | [**prompt-history**](mods/prompt-history) | 이번 세션에 보낸 프롬프트를 시간과 함께 모아 보고, 클릭 한 번으로 그 위치로 돌아갑니다. | `/prompts` |
 | 🧩 | [**mod-manager**](mods/mod-manager) | 설치한 mod를 한 곳에서 둘러보고, 켜고 끄고, 각 mod의 패널을 바로 엽니다. | `/mods` |
 | 📖 | [**readability**](mods/readability) | Claude의 응답을 읽기 편하게 다시 그립니다. 스트리밍 중에도, 끝날 때 레이아웃이 튀지 않게. | `/readability` |
@@ -36,6 +37,7 @@ Claude Code 프롬프트에 붙여 넣으세요. 마켓플레이스를 추가할
 ```
 /plugin install diff-explorer --marketplace speardragon/ray-claude-code-mods
 /plugin install prompt-history --marketplace speardragon/ray-claude-code-mods
+/plugin install link-list --marketplace speardragon/ray-claude-code-mods
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
 /plugin install readability --marketplace speardragon/ray-claude-code-mods
 /plugin install tool-fold --marketplace speardragon/ray-claude-code-mods
@@ -48,6 +50,7 @@ Claude Code 프롬프트에 붙여 넣으세요. 마켓플레이스를 추가할
 claude plugin marketplace add speardragon/ray-claude-code-mods
 claude plugin install diff-explorer@ray-claude-code-mods
 claude plugin install prompt-history@ray-claude-code-mods
+claude plugin install link-list@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
 claude plugin install readability@ray-claude-code-mods
 claude plugin install tool-fold@ray-claude-code-mods
@@ -100,6 +103,18 @@ claude plugin install tool-fold@ray-claude-code-mods
 - **Mods / All**: hooks 모듈이 있는 mod만, 또는 스킬·MCP 플러그인까지 전부.
 
 [자세히 보기 →](mods/mod-manager)
+
+## 🔗 link-list
+
+> 답변에 나온 링크, 다시 찾지 말고 패널에서 바로.
+
+<img src="images/link-list.png" alt="link-list" width="100%">
+
+- **답변별로 묶은 링크**: 최신 답변이 위, 링크마다 번호 · 파비콘 · 글 · 도메인을 같은 칸에 맞춰서.
+- **본문과 같은 번호**: readability가 링크 뒤에 붙이는 `¹²³`이 패널의 `[1]` `[2]`. `/links 2`로 바로 열기.
+- **클릭 · Enter로 열기, `c`로 복사**. 파비콘은 그림을 그리는 터미널에서 그림으로, 아니면 색 배지로.
+
+[자세히 보기 →](mods/link-list)
 
 ## 📖 readability
 

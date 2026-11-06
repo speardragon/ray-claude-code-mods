@@ -24,6 +24,8 @@ It fixes the two things that bothered me about [glamour-dark](https://github.com
 - **Headings**: a terminal has one type size, so a heading carries its level in `#`s, H1 a heavy rule across the width
   and H2 a light one under its text, marks and rules in the heading's own color
 - **Inline code · links**: orange on a faint background / blue and underlined (clickable)
+- **Link numbers**: a superscript `¹²³` after each link, the numbers the [link-list](../link-list) pane shows as `[1]` `[2]`,
+  so `/links 2` opens it
 - **Code blocks**: a rounded frame with the language in its top edge, a background panel, syntax colors (TS/JS, Python,
   Go, Rust, shell, JSON, YAML…)
 - **Tables**: bright borders, a bold header on blue over a double rule, alignment (`:---:`), cells wrapped to fit; emoji like `✅` count two cells so
@@ -51,6 +53,7 @@ It fixes the two things that bothered me about [glamour-dark](https://github.com
 | Key | Default | |
 | --- | --- | --- |
 | `maxColumns` | `100` | The widest a reply's lines get. `0` is the terminal's full width |
+| `linkNumbers` | `superscript` | The number after a link: `superscript` (`Docs¹`), `bracket` (`Docs [1]`), `off` |
 
 ## Good to know
 

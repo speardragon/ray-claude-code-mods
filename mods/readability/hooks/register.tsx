@@ -10,7 +10,8 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Line, Span } from './layout'
-import { layoutBlocks } from './layout'
+import { layoutReply } from './layout'
+import type { LinkStyle } from './layout'
 import { parseBlocks } from './markdown'
 import { T } from './theme'
 
@@ -29,15 +30,15 @@ const drawings = new Map<string, Line[]>() // laid-out lines by width and text, 
 // How each reply block was drawn: how many times, and how long its text was the first and last time.
 const seen = new Map<string, { draws: number; firstLength: number; lastLength: number }>()
 
-function linesFor(text: string, width: number): Line[] {
-  const key = `${width}\u0000${text}`
+function linesFor(text: string, width: number, style: LinkStyle): Line[] {
+  const key = `${width}\u0000${style}\u0000${text}`
   const kept = drawings.get(key)
   if (kept) {
     drawings.delete(key)
     drawings.set(key, kept)
     return kept
   }
-  const lines = layoutBlocks(parseBlocks(text), width)
+  const lines = layoutReply(parseBlocks(text), width, style)
   drawings.set(key, lines)
   if (drawings.size > CACHE_SIZE) drawings.delete(drawings.keys().next().value!)
   return lines
@@ -81,6 +82,7 @@ async function command($: EngineInterface, args: string) {
 
 export const register: Register = (on, options) => {
   const maxColumns = typeof options.maxColumns === 'number' ? options.maxColumns : 100
+  const linkNumbers: LinkStyle = options.linkNumbers === 'bracket' || options.linkNumbers === 'off' ? options.linkNumbers : 'superscript'
 
   on('session.start', async ($, e, next) => {
     const r = await next(e)
@@ -108,7 +110,7 @@ export const register: Register = (on, options) => {
     note(e.requestId, e.props.text.length)
     const columns = (e.viewport?.columns ?? FALLBACK_COLUMNS) - GUTTER - INDENT
     const width = Math.max(20, maxColumns > 0 ? Math.min(columns, maxColumns) : columns)
-    const lines = linesFor(e.props.text, width)
+    const lines = linesFor(e.props.text, width, linkNumbers)
     if (lines.length === 0) return next(e)
 
     const { Box, Text, Link } = $.ui.resolve(e)

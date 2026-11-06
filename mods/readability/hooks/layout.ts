@@ -2,6 +2,7 @@
 // CJK), list items hang under their text, and blocks are kept apart by one blank line: the same
 // flow the engine's own drawing has, so swapping one for the other moves nothing but the colors.
 import { highlight, isHighlighted } from './highlight'
+import { linksOf, numbersOf, superscript } from './links'
 import type { Block, Inline } from './markdown'
 import { charWidth, expandTabs, textWidth } from './text'
 import { T } from './theme'
@@ -11,6 +12,18 @@ export type Span = { text: string; paint: Paint; href?: string }
 export type Line = Span[]
 
 const base: Paint = { color: T.text }
+
+// How a link carries its number in a reply: `Docs¹`, `Docs [1]`, or not at all.
+export type LinkStyle = 'superscript' | 'bracket' | 'off'
+
+// The numbers marked after links while one reply is laid out by layoutReply; none otherwise.
+let marks: { numbers: Map<string, number>; style: LinkStyle } | null = null
+
+function markOf(href: string): Span[] {
+  const no = marks && marks.style !== 'off' ? marks.numbers.get(href) : undefined
+  if (no === undefined) return []
+  return marks!.style === 'superscript' ? [{ text: superscript(no), paint: { color: T.number } }] : [{ text: ` [${no}]`, paint: { color: T.muted } }]
+}
 
 // ---- inline to spans --------------------------------------------------------------------------
 
@@ -28,7 +41,7 @@ function spansOf(inline: Inline[], paint: Paint = base, href?: string): Span[] {
       case 'code':
         return [{ text: node.text, paint: { ...paint, color: T.code, backgroundColor: T.codeBg, italic: false }, href }]
       case 'link':
-        return spansOf(node.children, { ...paint, color: T.link, underline: true }, node.href)
+        return [...spansOf(node.children, { ...paint, color: T.link, underline: true }, node.href), ...markOf(node.href)]
     }
   })
 }
@@ -236,4 +249,14 @@ export function layoutBlocks(blocks: Block[], width: number, depth = 0): Line[] 
     }
   })
   return out
+}
+
+// A whole reply laid out, each link followed by its number (links.ts numbers them as link-list does).
+export function layoutReply(blocks: Block[], width: number, style: LinkStyle): Line[] {
+  marks = style === 'off' ? null : { numbers: numbersOf(linksOf(blocks)), style }
+  try {
+    return layoutBlocks(blocks, width)
+  } finally {
+    marks = null
+  }
 }

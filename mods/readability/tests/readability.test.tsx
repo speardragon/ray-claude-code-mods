@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { layoutBlocks, wrap } from '../hooks/layout'
+import { layoutBlocks, layoutReply, wrap } from '../hooks/layout'
+import { linksOf, superscript } from '../hooks/links'
 import type { Line } from '../hooks/layout'
 import { parseBlocks, parseInline } from '../hooks/markdown'
 import { textWidth } from '../hooks/text'
@@ -99,4 +100,46 @@ test('a reply is drawn by the mod, and by the engine once /readability turns it 
   const off = await $.ui.mount({ ...REPLY, surface: 'terminal' })
   expect(await off.find({ type: 'Text', text: 'engine' })).toBeDefined()
   await off.unmount()
+})
+
+describe('link numbers', () => {
+  test('links are numbered as they are read; a repeated URL keeps its number; code is skipped', async () => {
+    const text = [
+      'See [Docs](https://a.dev/docs) and <https://b.dev>.',
+      '',
+      '- item https://c.dev/x, then [again](https://a.dev/docs)',
+      '',
+      '> quoted [q](https://d.dev)',
+      '',
+      '| h [t](https://e.dev) |',
+      '| --- |',
+      '| https://f.dev |',
+      '',
+      '`https://code.dev` and',
+      '',
+      '```',
+      'https://fence.dev',
+      '```',
+    ].join('\n')
+    expect(linksOf(parseBlocks(text)).map(l => [l.no, l.url, l.text])).toEqual([
+      [1, 'https://a.dev/docs', 'Docs'],
+      [2, 'https://b.dev', 'https://b.dev'],
+      [3, 'https://c.dev/x', 'https://c.dev/x'],
+      [4, 'https://d.dev', 'q'],
+      [5, 'https://e.dev', 't'],
+      [6, 'https://f.dev', 'https://f.dev'],
+    ])
+  })
+
+  test('superscript numbers follow each link, bracket and off as set', async () => {
+    const blocks = parseBlocks('[Docs](https://a.dev) and [Repo](https://b.dev), [Docs](https://a.dev) again')
+    expect(plain(layoutReply(blocks, 80, 'superscript'))[0]).toBe('Docs¹ and Repo², Docs¹ again')
+    expect(plain(layoutReply(blocks, 80, 'bracket'))[0]).toBe('Docs [1] and Repo [2], Docs [1] again')
+    expect(plain(layoutReply(blocks, 80, 'off'))[0]).toBe('Docs and Repo, Docs again')
+    // The number is not part of the link: not underlined, no href.
+    const mark = layoutReply(blocks, 80, 'superscript')[0]!.find(s => s.text === '¹')!
+    expect(mark.href).toBeUndefined()
+    expect(mark.paint.underline).toBeUndefined()
+    expect(superscript(12)).toBe('¹²')
+  })
 })

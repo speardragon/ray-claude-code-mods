@@ -1,0 +1,22 @@
+{
+  "name": "link-list",
+  "version": "0.1.0",
+  "description": "Every link in Claude's replies, listed beside the chat with its favicon; click one to open it. /links opens it.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "locale": {
+      "type": "string",
+      "title": "Language",
+      "default": "ko",
+      "options": [
+        "ko",
+        "en"
+      ],
+      "description": "How the rules read: ko (3분 전 · 답변 #2) or en (3m ago · reply #2)."
+    }
+  }
+}

@@ -34,6 +34,14 @@ if [ "$listed" != "$present" ]; then
   failed+=("marketplace")
 fi
 
+# link-list numbers links as readability does: both keep the same parser and numbering.
+for shared in markdown.ts links.ts; do
+  if ! cmp -s "mods/readability/hooks/$shared" "mods/link-list/hooks/$shared"; then
+    echo "mods/readability/hooks/$shared and mods/link-list/hooks/$shared differ"
+    failed+=("shared $shared")
+  fi
+done
+
 if [ ${#failed[@]} -gt 0 ]; then
   echo "failed: ${failed[*]}"
   exit 1

@@ -24,6 +24,7 @@
 | | Mod | What it does | Open with |
 | --- | --- | --- | --- |
 | 🗂️ | [**diff-explorer**](mods/diff-explorer/README.en.md) | Collects the files Claude changes into a VS Code-style tree and shows the picked one's diff in GitHub dark. | `/diffs` |
+| 🔗 | [**link-list**](mods/link-list/README.en.md) | Collects the links in Claude's replies with their favicons; one click opens one. Numbered as readability numbers them in the reply. | `/links` |
 | 💬 | [**prompt-history**](mods/prompt-history/README.en.md) | Lists the prompts you sent this session with when you sent them; one click takes you back to one. | `/prompts` |
 | 🧩 | [**mod-manager**](mods/mod-manager/README.en.md) | Browse your installed mods in one place, switch them on and off, open their panels. | `/mods` |
 | 📖 | [**readability**](mods/readability/README.en.md) | Draws Claude's replies for reading: while they stream, and without a jolt when they end. | `/readability` |
@@ -36,6 +37,7 @@ Paste this at the Claude Code prompt, and answer `y` when it asks to add the mar
 ```
 /plugin install diff-explorer --marketplace speardragon/ray-claude-code-mods
 /plugin install prompt-history --marketplace speardragon/ray-claude-code-mods
+/plugin install link-list --marketplace speardragon/ray-claude-code-mods
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
 /plugin install readability --marketplace speardragon/ray-claude-code-mods
 /plugin install tool-fold --marketplace speardragon/ray-claude-code-mods
@@ -48,6 +50,7 @@ Paste this at the Claude Code prompt, and answer `y` when it asks to add the mar
 claude plugin marketplace add speardragon/ray-claude-code-mods
 claude plugin install diff-explorer@ray-claude-code-mods
 claude plugin install prompt-history@ray-claude-code-mods
+claude plugin install link-list@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
 claude plugin install readability@ray-claude-code-mods
 claude plugin install tool-fold@ray-claude-code-mods
@@ -100,6 +103,18 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 - **Mods / All**: just the plugins with a hooks module, or every plugin, skills and MCP included.
 
 [More →](mods/mod-manager/README.en.md)
+
+## 🔗 link-list
+
+> The links from the replies, in a pane, without scrolling back for them.
+
+<img src="images/link-list.png" alt="link-list" width="100%">
+
+- **Grouped by reply**: newest on top; each link's number, favicon, words and host in aligned columns.
+- **The numbers in the reply**: the `¹²³` readability puts after a link are the pane's `[1]` `[2]`; `/links 2` opens one.
+- **Click or Enter opens, `c` copies**. Favicons are pictures where the terminal draws them, colored badges elsewhere.
+
+[More →](mods/link-list/README.en.md)
 
 ## 📖 readability
 

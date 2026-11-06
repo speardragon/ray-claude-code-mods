@@ -113,11 +113,22 @@ const css = (props, extra = {}) => {
 
 const size = (v, unit) => (typeof v === 'number' ? `${v * unit}px` : typeof v === 'string' ? v : undefined)
 
+// A picture from a file, as a terminal that draws pictures shows it; one whose file is not here
+// draws its alt text, as a terminal that cannot does.
+function picture(p) {
+  // A fixture cannot read the environment: `/__TMPDIR__/` stands for this machine's temp folder.
+  const file = p.source?.file?.replace(/^\/__TMPDIR__\//, `${tmpdir()}/`)
+  const style = `width:${size(p.columns, CELL_W)};height:${size(p.rows, CELL_H)};flex-shrink:0;object-fit:contain;display:inline-block;vertical-align:top`
+  if (file && existsSync(file)) return `<img src="file://${esc(file)}" style="${style}">`
+  return `<span style="color:${DIM};${style}">${cells(p.alt ?? '')}</span>`
+}
+
 function inline(node, clients) {
   if (typeof node === 'string') return cells(node)
   if (!node || typeof node !== 'object') return ''
   const kids = (node.children ?? []).map(c => inline(c, clients)).join('')
   if (node.type === 'Text') return `<span style="${css(node.props ?? {})}">${kids}</span>`
+  if (node.type === 'Image') return picture(node.props ?? {})
   if (node.type === 'Button') {
     const p = node.props ?? {}
     const label = kids || cells(p.label ?? '')
@@ -141,6 +152,7 @@ function block(node, clients) {
     return `<div class="line" style="${css(p)}">${(node.children ?? []).map(c => inline(c, clients)).join('')}</div>`
   }
   if (node.type === 'Button') return `<div class="line">${inline(node, clients)}</div>`
+  if (node.type === 'Image') return picture(p)
   if (node.type === 'Code') {
     const lines = String(p.source ?? '').split('\n')
     const start = p.startLine
