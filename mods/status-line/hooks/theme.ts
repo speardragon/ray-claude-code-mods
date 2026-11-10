@@ -14,10 +14,13 @@ export const span = (text: string, paint?: Paint, href?: string): Span => ({
 
 export const T = {
   brand: 'claude',
+  // Words and figures: the theme's own text color, white on a dark theme and black on a light one.
+  label: 'text',
+  // What is grey by meaning: a draft pull request, the dots of an effort not reached, an empty meter.
   muted: 'inactive',
   faint: 'subtle',
   path: '#57c7ff',
-  branch: 'gray',
+  branch: 'text',
   commit: 'green',
   gitStatus: 'yellow',
   merged: 'merged',

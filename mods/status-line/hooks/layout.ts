@@ -35,7 +35,7 @@ const join = (groups: readonly (readonly Span[])[], separator: readonly Span[] =
 // Filled dots and the level's name in the level's color; the dots not reached are left dim.
 export function effortSpans(effort: Effort): Span[] {
   if (effort.kind === 'none') return []
-  if (effort.kind === 'unknown') return [span('  effort ?', { color: T.muted })]
+  if (effort.kind === 'unknown') return [span('  effort ?', { color: T.label })]
   const lit = EFFORT_LEVELS.indexOf(effort.level) + 1
   if (lit === 0) return [span(`  ${effort.level}`)]
   const paint = { color: T.effort[effort.level] ?? T.brand, weight: 'bold' } as const
@@ -58,12 +58,12 @@ function meterSpans(meter: Meter, variant: Variant): Span[] {
   const color = meter.used === undefined ? T.muted : (meter.color ?? T.status[status])
   const filled = used <= 0 ? 0 : Math.min(variant.bar, Math.max(1, Math.round((used / PERCENT) * variant.bar)))
   return [
-    span(`${meter.label} `, { color: meter.color ?? T.muted }),
+    span(`${meter.label} `, { color: meter.color ?? T.label }),
     span(T.filled.repeat(filled), { color }),
     span(T.track.repeat(variant.bar - filled), { color, dimColor: true }),
     span(` ${meter.value}`, { weight: 'bold' }),
     ...(meter.used !== undefined && status === 'critical' ? [span(' !', { color: T.status.critical, weight: 'bold' })] : []),
-    ...(meter.extra !== undefined && variant.hasExtras ? [span(`  ${meter.extra}`, { color: T.muted })] : []),
+    ...(meter.extra !== undefined && variant.hasExtras ? [span(`  ${meter.extra}`, { color: T.label })] : []),
   ]
 }
 
@@ -134,7 +134,7 @@ export function usageRows(
 
 // Only the number carries the state's color; the whole of it opens the pull request.
 const pullRequestSpans = (pr: PullRequest): Span[] => [
-  span('PR ', { color: T.muted }, pr.url),
+  span('PR ', { color: T.label }, pr.url),
   span(`#${pr.number}`, { color: pullRequestColor(pr), weight: 'bold', underline: true }, pr.url),
 ]
 
