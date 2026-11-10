@@ -24,9 +24,9 @@ const OID = '1234567890abcdef1234567890abcdef12345678'
 const PR_URL = 'https://github.com/acme/acme-web/pull/12'
 
 const LIMITS = '5h ━━━─────── 28%  ↻2h13m · 7d ━━━━────── 42%  ↻3d'
-const HEAD_ROW = '✻ Opus 5.5  effort ?'
 const CONTEXT = 'ctx ━━──────── 23%  46k/200k'
-const METERS_ROW = `${CONTEXT} · ${LIMITS}`
+const HEAD_ROW = `✻ Opus 5.5  effort ? · ${CONTEXT}`
+const METERS_ROW = LIMITS
 const FEATURE_STATUS = [
   `# branch.oid ${OID}`,
   '# branch.head feature/bar',
@@ -182,15 +182,15 @@ describe('the line under the prompt', () => {
     const { clock } = setUp(on, { settings: { effortLevel: 'medium' } })
     await $.session.start(START)
     await clock.settle()
-    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●○○○ medium')
+    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●○○○ medium · ctx ')
 
     await step($, { effort: 'max' })
     await clock.settle()
-    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●●● max')
+    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●●● max · ctx ')
 
     await step($, { effort: 'low', agentId: 'sub-1' })
     await clock.settle()
-    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●●● max')
+    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●●● max · ctx ')
   })
 
   test('the line /effort leaves shows before the next request', async ($, on) => {
@@ -207,7 +207,7 @@ describe('the line under the prompt', () => {
       uuid: 'row-effort',
     })
     await clock.settle()
-    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●○○ high')
+    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●○○ high · ctx ')
   })
 
   test('a new measurement moves the bars', async ($, on) => {
@@ -217,7 +217,7 @@ describe('the line under the prompt', () => {
     world.usage = usageOf(184_000)
     await $.session.measure({ context: world.usage.context, rateLimits: world.usage.rateLimits, changed: ['context'] })
     await clock.settle()
-    expect((await rows($))[1]).toStartWith('ctx ━━━━━━━━━─ 92% !  184k/200k · ')
+    expect((await rows($))[0]).toEndWith(' · ctx ━━━━━━━━━─ 92% !  184k/200k')
   })
 
   test('the countdown moves as minutes pass', async ($, on) => {
@@ -248,19 +248,18 @@ describe('the line under the prompt', () => {
     expect(await rows($)).toEqual([HEAD_ROW, METERS_ROW])
   })
 
-  test('the meters take more rows as the width narrows, and never overflow', async ($, on) => {
+  test('the rows give way as the width narrows, and never overflow', async ($, on) => {
     const { clock } = setUp(on)
     await $.session.start(START)
     await clock.settle()
-    // One row is kept as long as it can be: shorter bars first, then the detail goes.
-    expect(await rows($, { columns: 70 })).toEqual([HEAD_ROW, 'ctx ━───── 23%  46k/200k · 5h ━━──── 28%  ↻2h13m · 7d ━━━─── 42%  ↻3d'])
-    expect(await rows($, { columns: 60 })).toEqual([HEAD_ROW, 'ctx ━───── 23% · 5h ━━──── 28% · 7d ━━━─── 42%'])
-    expect(await rows($, { columns: 44 })).toEqual([HEAD_ROW, 'ctx ━─── 23% · 5h ━─── 28% · 7d ━━── 42%'])
-    // Then two rows.
-    expect(await rows($, { columns: 36 })).toEqual([HEAD_ROW, 'ctx ━───── 23% · 5h ━━──── 28%', '7d ━━━─── 42%'])
-    // Then a row for each meter.
-    expect(await rows($, { columns: 20 })).toEqual([HEAD_ROW, 'ctx ━───── 23%', '5h ━━──── 28%', '7d ━━━─── 42%'])
-    for (const columns of [50, 40, 30, 24, 20]) {
+    const MODEL = '✻ Opus 5.5  effort ?'
+    // The context meter stays beside the model while any drawing of it fits: shorter, then without its detail.
+    expect(await rows($, { columns: 70 })).toEqual([HEAD_ROW, LIMITS])
+    expect(await rows($, { columns: 40 })).toEqual([`${MODEL} · ctx ━───── 23%`, '5h ━━──── 28% · 7d ━━━─── 42%'])
+    // With no room beside the model it leads the meters below.
+    expect(await rows($, { columns: 30 })).toEqual([MODEL, 'ctx ━───── 23% · 5h ━━──── 28%', '7d ━━━─── 42%'])
+    expect(await rows($, { columns: 20 })).toEqual([MODEL, 'ctx ━───── 23%', '5h ━━──── 28%', '7d ━━━─── 42%'])
+    for (const columns of [70, 50, 40, 30, 24, 20]) {
       for (const row of await rows($, { columns })) expect(textWidth(row)).toBeLessThanOrEqual(columns)
     }
   })
@@ -271,7 +270,7 @@ describe('the line under the prompt', () => {
     await clock.settle()
     for (const surface of ['mobile', 'vscode'] as const) {
       const drawnRows = await rows($, { surface, columns: 36 })
-      expect(drawnRows).toEqual(['~/dev/acme-web · feature/a-long-bra…', HEAD_ROW, 'ctx ━───── 23% · 5h ━━──── 28%', '7d ━━━─── 42%'])
+      expect(drawnRows).toEqual(['~/dev/acme-web · feature/a-long-bra…', '✻ Opus 5.5  effort ? · ctx ━─── 23%', '5h ━━──── 28% · 7d ━━━─── 42%'])
       for (const row of drawnRows) expect(textWidth(row)).toBeLessThanOrEqual(36)
     }
     const tree = JSON.stringify(await drawn($, { surface: 'mobile', columns: 36 }))
@@ -500,7 +499,7 @@ describe('parts', () => {
 
   test('a session with no limits and no reading yet still draws', async () => {
     const usage: Usage = { model: 'claude-fable-5-2', context: { window: 1_000_000 }, minute: 0 }
-    expect(usageRows(usage, { kind: 'none' }, undefined, 120, NOW).map(rowText)).toEqual(['✻ Fable 5.2', 'ctx ────────── —  —/1M'])
+    expect(usageRows(usage, { kind: 'none' }, undefined, 120, NOW).map(rowText)).toEqual(['✻ Fable 5.2 · ctx ────────── —  —/1M'])
   })
 
   test('formats', async () => {

@@ -1,5 +1,5 @@
-// The rows under the prompt as runs of styled text: a git row, the model and its effort, then the
-// meters, which take more rows as the surface narrows.
+// The rows under the prompt as runs of styled text: a git row, the model with its effort and context
+// window, then the plan's limits, which take more rows as the surface narrows.
 import type { Effort, Git, LimitWindow, PullRequest, Usage } from '../types'
 import { EFFORT_LEVELS } from './effort'
 import type { ResetStyle } from './format'
@@ -102,9 +102,18 @@ function pack(meters: readonly Span[][], columns: number): Span[][] {
 
 const fits = (rows: readonly Span[][], columns: number) => rows.every(row => rowWidth(row) <= columns)
 
-// The model and its effort on a row of their own, the meters stacked under it. The meters take as few
-// rows as the width allows, and among those the widest drawing: one row with long bars on a wide
-// terminal, down to a short bar per row on a phone.
+// Meters in as few rows as the width allows and, among those, the widest drawing.
+function stack(meters: readonly Meter[], columns: number): Span[][] {
+  if (meters.length === 0) return []
+  const packings = VARIANTS.map(variant => pack(meters.map(meter => meterSpans(meter, variant)), columns))
+  const fitting = packings.filter(rows => fits(rows, columns))
+  const fewest = Math.min(...fitting.map(rows => rows.length))
+  return fitting.find(rows => rows.length === fewest) ?? packings.at(-1) ?? []
+}
+
+// The model, its effort and the context window on one row, the plan's limits stacked under it: one
+// row with long bars on a wide terminal, down to a short bar per row on a phone. Where the context
+// meter does not fit beside the model in any drawing, it leads the meters below.
 export function usageRows(
   usage: Usage,
   effort: Effort,
@@ -112,17 +121,15 @@ export function usageRows(
   columns: number,
   now: number,
 ): Span[][] {
-  const head = [span(`${T.mark} `, { color: T.brand }), span(prettyModel(usage.model), { weight: 'bold' }), ...effortSpans(effort)]
-  const meters = [
-    contextMeter(usage.context),
+  const model = [span(`${T.mark} `, { color: T.brand }), span(prettyModel(usage.model), { weight: 'bold' }), ...effortSpans(effort)]
+  const context = contextMeter(usage.context)
+  const limits = [
     ...(usage.fiveHour ? [limitMeter('5h', usage.fiveHour, now, 'minutes')] : []),
     ...(usage.sevenDay ? [limitMeter('7d', usage.sevenDay, now, 'hours')] : []),
     ...(fable ? [fableMeter(fable, usage.sevenDay, now)] : []),
   ]
-  const packings = VARIANTS.map(variant => pack(meters.map(meter => meterSpans(meter, variant)), columns))
-  const fitting = packings.filter(rows => fits(rows, columns))
-  const fewest = Math.min(...fitting.map(rows => rows.length))
-  return [head, ...(fitting.find(rows => rows.length === fewest) ?? packings.at(-1) ?? [])]
+  const head = VARIANTS.map(variant => join([model, meterSpans(context, variant)])).find(row => rowWidth(row) <= columns)
+  return head === undefined ? [model, ...stack([context, ...limits], columns)] : [head, ...stack(limits, columns)]
 }
 
 // Only the number carries the state's color; the whole of it opens the pull request.

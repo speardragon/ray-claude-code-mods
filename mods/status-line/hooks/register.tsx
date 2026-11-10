@@ -1,6 +1,6 @@
 // status-line: a status line under the prompt.
-//   Below the engine's own hint line it draws a git row (path · branch · pull request) and a usage
-//   row (model and effort, the context window, the five-hour and weekly plan limits, Fable's own),
+//   Below the engine's own hint line it draws a git row (path · branch · pull request), a model row
+//   (model, effort and the context window) and the plan's limits under it (five-hour, weekly, Fable's own),
 //   each limit as a bar whose color follows what is left. The rows fold as the terminal narrows.
 //   Figures come from the engine ($.session.usage), the repository from git, the pull request from gh,
 //   the Fable limit from the plan's usage endpoint.

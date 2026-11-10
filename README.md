@@ -154,9 +154,9 @@ claude plugin install status-line@ray-claude-code-mods
 
 <img src="images/status-line.png" alt="status-line" width="100%">
 
-- **모델 줄과 미터**: 모델과 effort, 그 아래 컨텍스트 · 5시간 · 주간 · Fable 한도를 남은 양에 따라 색이 바뀌는 바로.
+- **모델 줄과 한도**: 모델 · effort · 컨텍스트가 한 줄, 그 아래 5시간 · 주간 · Fable 한도. 바 색은 남은 양에 따라 바뀜.
 - **git 줄**: 전체 경로(`~/dev/acme-web`) · 브랜치 · 브랜치의 PR. PR 번호 색이 상태, 누르면 열림.
-- **폭에 맞춰 쌓임**: 모델 · effort 한 줄 아래 미터가 쌓이고, 좁아지면 바를 줄이고 줄을 늘려요. 모바일에서도 넘치지 않게.
+- **폭에 맞춰 쌓임**: 모델 줄 아래 한도 미터가 쌓이고, 좁아지면 바를 줄이고 줄을 늘려요. 모바일에서도 넘치지 않게.
 
 [자세히 보기 →](mods/status-line)
 

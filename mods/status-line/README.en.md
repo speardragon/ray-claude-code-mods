@@ -12,9 +12,9 @@ limits is used, always in view.
 ```
   ⏵⏵ accept edits on (shift+tab to cycle)            ← Claude Code's own hint line (kept)
   ~/dev/acme-web · feat/status-line · PR #12         ← git row
-  ✻ Fable 5.2  ●●●○○ high                            ← model row
-  ctx ━━━━━━━─── 71%  715k/1M · 5h ━───────── 13%  ↻3h35m · 7d ━━━━━━━━── 82%  ↻5d · fable ━━━━────── 37%
-                                                     ← meter row
+  ✻ Fable 5.2  ●●●○○ high · ctx ━━━━━━━─── 71%  715k/1M        ← model row
+  5h ━───────── 13%  ↻3h35m · 7d ━━━━━━━━── 82%  ↻5d · fable ━━━━────── 37%
+                                                     ← limits row
 ```
 
 | Row | Item | What it is |
@@ -23,9 +23,9 @@ limits is used, always in view.
 | git | branch | `(commit)` on a detached HEAD; an operation under way (a rebase, a merge, ...) as `(REBASING)` |
 | git | pull request | The branch's pull request number; its color is the state, and pressing it opens the page |
 | model | model, effort | The model's name and its effort on five steps (`●●●○○ high`) |
-| meter | `ctx` | The context window's fill, and `tokens used/window size` |
-| meter | `5h`, `7d` | The five-hour and weekly limits, with the time to their reset (`↻3h35m`) |
-| meter | `fable` | The Fable-only weekly limit, while the model is Fable |
+| model | `ctx` | The context window's fill, and `tokens used/window size` |
+| limits | `5h`, `7d` | The five-hour and weekly limits, with the time to their reset (`↻3h35m`) |
+| limits | `fable` | The Fable-only weekly limit, while the model is Fable |
 
 Outside a repository there is no git row.
 
@@ -38,14 +38,14 @@ Outside a repository there is no git row.
 
 ### Fitted to the width
 
-The meters stack under the model row, in as few rows as the width allows and, among those, the widest drawing.
+The limits stack under the model row, in as few rows as the width allows and, among those, the widest drawing.
 
-| Width | Meters |
-| --- | --- |
-| Wide | one row, long bars with their detail (tokens, time left) |
-| Narrower | one row with shorter bars, then without the detail |
-| Narrow | two rows |
-| Very narrow | a row per meter |
+| Width | `ctx` on the model row | Limits |
+| --- | --- | --- |
+| Wide | a long bar with the tokens | one row, long bars with the time left |
+| Narrower | a shorter bar, then without the tokens | one row with shorter bars, then without the time left |
+| Narrow | with no room beside the model, it leads the limits | two rows |
+| Very narrow | the same | a row per meter |
 
 The git row cuts the branch name, then the start of the path (`…/acme-web`), and drops the pull request last. Hangul
 counts two cells.

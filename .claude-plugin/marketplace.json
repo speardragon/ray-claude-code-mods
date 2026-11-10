@@ -68,7 +68,7 @@
     {
       "name": "status-line",
       "description": "A status line under the prompt: the folder and branch with its pull request, model and effort, and bars for context and the five-hour, weekly and Fable limits.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./mods/status-line",
       "category": "See what's happening",
       "tags": [
