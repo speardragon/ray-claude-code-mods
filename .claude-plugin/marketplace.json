@@ -66,6 +66,18 @@
       ]
     },
     {
+      "name": "status-line",
+      "description": "A status line under the prompt: the folder and branch with its pull request, model and effort, and bars for context and the five-hour, weekly and Fable limits.",
+      "version": "0.1.0",
+      "source": "./mods/status-line",
+      "category": "See what's happening",
+      "tags": [
+        "status",
+        "git",
+        "usage"
+      ]
+    },
+    {
       "name": "tool-fold",
       "description": "Each tool call as one quiet line, its result folded away (click to unfold); /tools panel lists every call beside the chat, each in a view that suits its tool (MongoDB in Compass style, images as pictures). /tools toggles it.",
       "version": "0.5.0",

@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-mods-d97757.svg" alt="Claude Code mods">
-  <img src="https://img.shields.io/badge/mods-5-3fb950.svg" alt="5 mods">
+  <img src="https://img.shields.io/badge/mods-7-3fb950.svg" alt="7 mods">
 </p>
 
 <p align="center">
@@ -29,6 +29,7 @@
 | 🧩 | [**mod-manager**](mods/mod-manager) | 설치한 mod를 한 곳에서 둘러보고, 켜고 끄고, 각 mod의 패널을 바로 엽니다. | `/mods` |
 | 📖 | [**readability**](mods/readability) | Claude의 응답을 읽기 편하게 다시 그립니다. 스트리밍 중에도, 끝날 때 레이아웃이 튀지 않게. | `/readability` |
 | 🗜️ | [**tool-fold**](mods/tool-fold) | 도구 호출을 한 줄씩, 결과는 접어 두고 클릭하면 펼치기. `/tools panel`로 도구별 상세 패널(MongoDB는 Compass 스타일, 이미지는 그림 그대로). | `/tools` |
+| 📊 | [**status-line**](mods/status-line) | 프롬프트 아래에 모델·effort, 컨텍스트와 5시간·주간·Fable 한도 바, 경로·브랜치와 PR을 보여줍니다. | 항상 표시 |
 
 ## 🚀 설치
 
@@ -41,6 +42,7 @@ Claude Code 프롬프트에 붙여 넣으세요. 마켓플레이스를 추가할
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
 /plugin install readability --marketplace speardragon/ray-claude-code-mods
 /plugin install tool-fold --marketplace speardragon/ray-claude-code-mods
+/plugin install status-line --marketplace speardragon/ray-claude-code-mods
 ```
 
 <details>
@@ -54,6 +56,7 @@ claude plugin install link-list@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
 claude plugin install readability@ray-claude-code-mods
 claude plugin install tool-fold@ray-claude-code-mods
+claude plugin install status-line@ray-claude-code-mods
 ```
 
 데스크톱 앱에서는 프롬프트 옆 `+` → **Plugins** → **Add marketplace**에 `speardragon/ray-claude-code-mods`를 넣고, **Add plugin**으로 고르세요.
@@ -144,6 +147,18 @@ claude plugin install tool-fold@ray-claude-code-mods
 - `/tools`로 켜고 끄기(다음 세션에도 유지).
 
 [자세히 보기 →](mods/tool-fold)
+
+## 📊 status-line
+
+> 지금 얼마나 썼는지, 어느 브랜치인지. 프롬프트 바로 아래에서.
+
+<img src="images/status-line.png" alt="status-line" width="100%">
+
+- **모델 줄과 미터**: 모델과 effort, 그 아래 컨텍스트 · 5시간 · 주간 · Fable 한도를 남은 양에 따라 색이 바뀌는 바로.
+- **git 줄**: 전체 경로(`~/dev/acme-web`) · 브랜치 · 브랜치의 PR. PR 번호 색이 상태, 누르면 열림.
+- **폭에 맞춰 쌓임**: 모델 · effort 한 줄 아래 미터가 쌓이고, 좁아지면 바를 줄이고 줄을 늘려요. 모바일에서도 넘치지 않게.
+
+[자세히 보기 →](mods/status-line)
 
 ---
 

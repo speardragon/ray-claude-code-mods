@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-mods-d97757.svg" alt="Claude Code mods">
-  <img src="https://img.shields.io/badge/mods-5-3fb950.svg" alt="5 mods">
+  <img src="https://img.shields.io/badge/mods-7-3fb950.svg" alt="7 mods">
 </p>
 
 <p align="center">
@@ -29,6 +29,7 @@
 | 🧩 | [**mod-manager**](mods/mod-manager/README.en.md) | Browse your installed mods in one place, switch them on and off, open their panels. | `/mods` |
 | 📖 | [**readability**](mods/readability/README.en.md) | Draws Claude's replies for reading: while they stream, and without a jolt when they end. | `/readability` |
 | 🗜️ | [**tool-fold**](mods/tool-fold/README.en.md) | Tool calls as one line each, results folded; click to unfold. `/tools panel` shows each call in a view that suits its tool (MongoDB as Compass, images as pictures). | `/tools` |
+| 📊 | [**status-line**](mods/status-line/README.en.md) | Under the prompt: model and effort, bars for context and the five-hour, weekly and Fable limits, the path, branch and its pull request. | always on |
 
 ## 🚀 Install
 
@@ -41,6 +42,7 @@ Paste this at the Claude Code prompt, and answer `y` when it asks to add the mar
 /plugin install mod-manager --marketplace speardragon/ray-claude-code-mods
 /plugin install readability --marketplace speardragon/ray-claude-code-mods
 /plugin install tool-fold --marketplace speardragon/ray-claude-code-mods
+/plugin install status-line --marketplace speardragon/ray-claude-code-mods
 ```
 
 <details>
@@ -54,6 +56,7 @@ claude plugin install link-list@ray-claude-code-mods
 claude plugin install mod-manager@ray-claude-code-mods
 claude plugin install readability@ray-claude-code-mods
 claude plugin install tool-fold@ray-claude-code-mods
+claude plugin install status-line@ray-claude-code-mods
 ```
 
 In the desktop app: click `+` beside the prompt → **Plugins** → **Add marketplace** with `speardragon/ray-claude-code-mods`, then **Add plugin**.
@@ -144,6 +147,18 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 - `/tools` toggles it (remembered across sessions).
 
 [More →](mods/tool-fold/README.en.md)
+
+## 📊 status-line
+
+> How much is used and which branch you are on, right under the prompt.
+
+<img src="images/status-line.png" alt="status-line" width="100%">
+
+- **Model row and meters**: model and effort, and under them context and the five-hour, weekly and Fable limits as bars colored by what is left.
+- **Git row**: the full path (`~/dev/acme-web`), the branch and the branch's pull request; the number's color is its state, and pressing it opens the page.
+- **Fitted to the width**: the meters stack under the model row, with shorter bars and more rows as it narrows; nothing overflows on a phone.
+
+[More →](mods/status-line/README.en.md)
 
 ---
 

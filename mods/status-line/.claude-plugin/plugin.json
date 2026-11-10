@@ -1,0 +1,18 @@
+{
+  "name": "status-line",
+  "version": "0.1.0",
+  "description": "A status line under the prompt: the folder and branch with its pull request, model and effort, and bars for context and the five-hour, weekly and Fable limits.",
+  "author": {
+    "name": "Ray Kang"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "githubAccount": {
+      "type": "string",
+      "title": "GitHub account",
+      "default": "",
+      "description": "The gh account the pull request is looked up as (its token from `gh auth token --user`). Empty uses whichever account gh has active, or GH_TOKEN."
+    }
+  }
+}
