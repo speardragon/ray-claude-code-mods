@@ -154,9 +154,9 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 
 <img src="images/status-line.png" alt="status-line" width="100%">
 
-- **Model row and limits**: model, effort and context on one row; under it the five-hour, weekly and Fable limits, each a bar colored by what is left.
-- **Git row**: the full path (`~/dev/acme-web`), the branch and the branch's pull request; the number's color is its state, and pressing it opens the page.
-- **Fitted to the width**: the limits stack under the model row, with shorter bars and more rows as it narrows; nothing overflows on a phone.
+- **Three rows**: `model │ path · branch · PR`, the context window, and the five-hour, weekly and Fable limits, each a bar colored by what is left.
+- **Git, beside the model**: the full path (`~/dev/acme-web`), the branch and the branch's pull request; the number's color is its state, and pressing it opens the page.
+- **Fitted to the width**: git drops to a row of its own, with shorter bars and more rows as it narrows; nothing overflows on a phone.
 
 [More →](mods/status-line/README.en.md)
 

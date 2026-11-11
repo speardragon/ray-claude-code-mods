@@ -10,24 +10,24 @@ limits is used, always in view.
 ## What it shows
 
 ```
-  ⏵⏵ accept edits on (shift+tab to cycle)            ← Claude Code's own hint line (kept)
-  ~/dev/acme-web · feat/status-line · PR #12         ← git row
-  ✻ Fable 5.2  ●●●○○ high · ctx ━━━━━━━─── 71%  715k/1M        ← model row
-  5h ━───────── 13%  ↻3h35m · 7d ━━━━━━━━── 82%  ↻5d · fable ━━━━────── 37%
-                                                     ← limits row
+  ⏵⏵ accept edits on (shift+tab to cycle)            ← Claude Code's own hint line (kept, always on top)
+  ✻ Fable 5.2  ●●●○○ high │ ~/dev/acme-web · feat/status-line · PR #12    ← ① model │ git
+  ctx ━━━━━━━─── 71%  715k/1M                        ← ② context
+  5h ━───────── 13%  ↻3h35m · 7d ━━━━━━━━── 82%  ↻5d · fable ━━━━────── 37%    ← ③ limits
 ```
 
 | Row | Item | What it is |
 | --- | --- | --- |
-| git | path | The working tree's full path, the home folder as `~`; inside a worktree, that worktree's |
-| git | branch | `(commit)` on a detached HEAD; an operation under way (a rebase, a merge, ...) as `(REBASING)` |
-| git | pull request | The branch's pull request number; its color is the state, and pressing it opens the page |
-| model | model, effort | The model's name and its effort on five steps (`●●●○○ high`) |
-| model | `ctx` | The context window's fill, and `tokens used/window size` |
-| limits | `5h`, `7d` | The five-hour and weekly limits, with the time to their reset (`↻3h35m`) |
-| limits | `fable` | The Fable-only weekly limit, while the model is Fable |
+| ① | path | The working tree's full path, the home folder as `~`; inside a worktree, that worktree's |
+| ① | branch | `(commit)` on a detached HEAD; an operation under way (a rebase, a merge, ...) as `(REBASING)` |
+| ① | pull request | The branch's pull request number; its color is the state, and pressing it opens the page |
+| ① | model, effort | The model's name and its effort on five steps (`●●●○○ high`) |
+| ② | `ctx` | The context window's fill, and `tokens used/window size` |
+| ③ | `5h`, `7d` | The five-hour and weekly limits, with the time to their reset (`↻3h35m`) |
+| ③ | `fable` | The Fable-only weekly limit, while the model is Fable |
 
-Outside a repository there is no git row.
+Outside a repository row ① holds the model and effort alone. Claude Code's hint line is always drawn on top by the
+engine, so this mod's rows sit under it.
 
 ### Colors
 
@@ -38,17 +38,15 @@ Outside a repository there is no git row.
 
 ### Fitted to the width
 
-The limits stack under the model row, in as few rows as the width allows and, among those, the widest drawing.
+| Width | ① model │ git | ② context | ③ limits |
+| --- | --- | --- | --- |
+| Wide | model │ git on one row | a long bar with the tokens | one row, long bars with the time left |
+| Narrower | a row for the model and one for git, where git does not fit whole beside it | a shorter bar, then without the tokens | one row with shorter bars, then without the time left |
+| Very narrow | the same | the same | a row per meter |
 
-| Width | `ctx` on the model row | Limits |
-| --- | --- | --- |
-| Wide | a long bar with the tokens | one row, long bars with the time left |
-| Narrower | a shorter bar, then without the tokens | one row with shorter bars, then without the time left |
-| Narrow | with no room beside the model, it leads the limits | two rows |
-| Very narrow | the same | a row per meter |
-
-The git row cuts the branch name, then the start of the path (`…/acme-web`), and drops the pull request last. Hangul
-counts two cells.
+Git sits beside the model only while its path and pull request fit whole. Otherwise it takes a row of its own, and
+if that overflows the branch name is cut, then the start of the path (`…/acme-web`), and the pull request goes last.
+Hangul counts two cells.
 
 A surface that does not say its width is taken as narrow (40 columns on mobile), and the rows ask for a monospaced
 face so the bars line up.

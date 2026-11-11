@@ -1,5 +1,7 @@
-// The rows under the prompt as runs of styled text: a git row, the model with its effort and context
-// window, then the plan's limits, which take more rows as the surface narrows.
+// The rows under the engine's hint line, as runs of styled text, top to bottom:
+//   model and effort │ git      (the git part drops to a row of its own where it does not fit beside)
+//   context window
+//   the plan's limits           (stacked in more rows as the surface narrows)
 import type { Effort, Git, LimitWindow, PullRequest, Usage } from '../types'
 import { EFFORT_LEVELS } from './effort'
 import type { ResetStyle } from './format'
@@ -13,6 +15,7 @@ const MIN_BRANCH_COLUMNS = 12
 const MIN_PATH_COLUMNS = 10
 const SAME_INSTANT_MS = 60_000
 const PERCENT = 100
+const PIPE: readonly Span[] = [span(' '), span('│', { color: T.faint }), span(' ')]
 
 type Variant = { bar: number; hasExtras: boolean }
 
@@ -111,27 +114,6 @@ function stack(meters: readonly Meter[], columns: number): Span[][] {
   return fitting.find(rows => rows.length === fewest) ?? packings.at(-1) ?? []
 }
 
-// The model, its effort and the context window on one row, the plan's limits stacked under it: one
-// row with long bars on a wide terminal, down to a short bar per row on a phone. Where the context
-// meter does not fit beside the model in any drawing, it leads the meters below.
-export function usageRows(
-  usage: Usage,
-  effort: Effort,
-  fable: LimitWindow | undefined,
-  columns: number,
-  now: number,
-): Span[][] {
-  const model = [span(`${T.mark} `, { color: T.brand }), span(prettyModel(usage.model), { weight: 'bold' }), ...effortSpans(effort)]
-  const context = contextMeter(usage.context)
-  const limits = [
-    ...(usage.fiveHour ? [limitMeter('5h', usage.fiveHour, now, 'minutes')] : []),
-    ...(usage.sevenDay ? [limitMeter('7d', usage.sevenDay, now, 'hours')] : []),
-    ...(fable ? [fableMeter(fable, usage.sevenDay, now)] : []),
-  ]
-  const head = VARIANTS.map(variant => join([model, meterSpans(context, variant)])).find(row => rowWidth(row) <= columns)
-  return head === undefined ? [model, ...stack([context, ...limits], columns)] : [head, ...stack(limits, columns)]
-}
-
 // Only the number carries the state's color; the whole of it opens the pull request.
 const pullRequestSpans = (pr: PullRequest): Span[] => [
   span('PR ', { color: T.label }, pr.url),
@@ -171,4 +153,44 @@ export function gitRows(git: Git | null, pr: PullRequest | undefined, columns: n
   })
   const row = attempts.find(one => rowWidth(one) <= columns) ?? attempts.at(-1)
   return row ? [row] : []
+}
+
+export type StatusInput = {
+  usage: Usage
+  effort: Effort
+  fable: LimitWindow | undefined
+  git: Git | null
+  pr: PullRequest | undefined
+}
+
+const modelSpans = (usage: Usage, effort: Effort): Span[] => [
+  span(`${T.mark} `, { color: T.brand }),
+  span(prettyModel(usage.model), { weight: 'bold' }),
+  ...effortSpans(effort),
+]
+
+// The git part sits beside the model only while it keeps its whole path and its pull request: a part
+// cut down to fit would be worth less than a row of its own.
+function headRows(model: Span[], git: Git | null, pr: PullRequest | undefined, columns: number): Span[][] {
+  if (git === null) return [model]
+  const [beside] = gitRows(git, pr, columns - rowWidth(model) - rowWidth(PIPE))
+  const isWhole = beside !== undefined && !rowText(beside).startsWith('…') && (pr === undefined || rowText(beside).includes('PR '))
+  if (beside !== undefined && isWhole && rowWidth(join([model, beside], PIPE)) <= columns) return [join([model, beside], PIPE)]
+  return [model, ...gitRows(git, pr, columns)]
+}
+
+// The context window alone on its row, in the widest drawing that fits.
+function contextRow(usage: Usage, columns: number): Span[] {
+  const drawings = VARIANTS.map(variant => meterSpans(contextMeter(usage.context), variant))
+  return drawings.find(row => rowWidth(row) <= columns) ?? drawings.at(-1) ?? []
+}
+
+export function statusRows(input: StatusInput, columns: number, now: number): Span[][] {
+  const { usage, effort, fable, git, pr } = input
+  const limits = [
+    ...(usage.fiveHour ? [limitMeter('5h', usage.fiveHour, now, 'minutes')] : []),
+    ...(usage.sevenDay ? [limitMeter('7d', usage.sevenDay, now, 'hours')] : []),
+    ...(fable ? [fableMeter(fable, usage.sevenDay, now)] : []),
+  ]
+  return [...headRows(modelSpans(usage, effort), git, pr, columns), contextRow(usage, columns), ...stack(limits, columns)]
 }

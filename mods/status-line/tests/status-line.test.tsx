@@ -6,7 +6,7 @@ import { effortFrom, isModelSwitch } from '../hooks/effort'
 import { formatTokens, prettyModel, resetIn } from '../hooks/format'
 import { fableOf } from '../hooks/fable'
 import { parseStatus, remoteOwner, tildePath } from '../hooks/git'
-import { gitRows, rowText, rowWidth, usageRows } from '../hooks/layout'
+import { gitRows, rowText, rowWidth, statusRows } from '../hooks/layout'
 import { pullRequestColor, pullRequestOf } from '../hooks/pr'
 import { textWidth, truncate } from '../hooks/text'
 import { T, statusOf } from '../hooks/theme'
@@ -25,7 +25,8 @@ const PR_URL = 'https://github.com/acme/acme-web/pull/12'
 
 const LIMITS = '5h ━━━─────── 28%  ↻2h13m · 7d ━━━━────── 42%  ↻3d'
 const CONTEXT = 'ctx ━━──────── 23%  46k/200k'
-const HEAD_ROW = `✻ Opus 5.5  effort ? · ${CONTEXT}`
+const MODEL = '✻ Opus 5.5  effort ?'
+const HEAD_ROW = MODEL
 const METERS_ROW = LIMITS
 const FEATURE_STATUS = [
   `# branch.oid ${OID}`,
@@ -161,7 +162,7 @@ describe('the line under the prompt', () => {
     await $.session.start(START)
     await clock.settle()
     for (const surface of ['terminal', 'desktop'] as const) {
-      expect(await rows($, { surface })).toEqual([HEAD_ROW, METERS_ROW])
+      expect(await rows($, { surface })).toEqual([HEAD_ROW, CONTEXT, METERS_ROW])
     }
   })
 
@@ -182,15 +183,15 @@ describe('the line under the prompt', () => {
     const { clock } = setUp(on, { settings: { effortLevel: 'medium' } })
     await $.session.start(START)
     await clock.settle()
-    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●○○○ medium · ctx ')
+    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●○○○ medium')
 
     await step($, { effort: 'max' })
     await clock.settle()
-    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●●● max · ctx ')
+    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●●● max')
 
     await step($, { effort: 'low', agentId: 'sub-1' })
     await clock.settle()
-    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●●● max · ctx ')
+    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●●● max')
   })
 
   test('the line /effort leaves shows before the next request', async ($, on) => {
@@ -207,7 +208,7 @@ describe('the line under the prompt', () => {
       uuid: 'row-effort',
     })
     await clock.settle()
-    expect((await rows($))[0]).toStartWith('✻ Opus 5.5  ●●●○○ high · ctx ')
+    expect((await rows($))[0]).toBe('✻ Opus 5.5  ●●●○○ high')
   })
 
   test('a new measurement moves the bars', async ($, on) => {
@@ -217,7 +218,7 @@ describe('the line under the prompt', () => {
     world.usage = usageOf(184_000)
     await $.session.measure({ context: world.usage.context, rateLimits: world.usage.rateLimits, changed: ['context'] })
     await clock.settle()
-    expect((await rows($))[0]).toEndWith(' · ctx ━━━━━━━━━─ 92% !  184k/200k')
+    expect((await rows($))[1]).toBe('ctx ━━━━━━━━━─ 92% !  184k/200k')
   })
 
   test('the countdown moves as minutes pass', async ($, on) => {
@@ -225,7 +226,7 @@ describe('the line under the prompt', () => {
     await $.session.start(START)
     await clock.settle()
     await clock.advance(60 * 60_000)
-    expect((await rows($))[1]).toContain('↻1h13m')
+    expect((await rows($))[2]).toContain('↻1h13m')
   })
 
   test('after /clear empties the session state the row comes back by itself', async ($, on) => {
@@ -245,23 +246,33 @@ describe('the line under the prompt', () => {
     session.isWiped = true
     expect(await rows($)).toEqual([])
     await clock.settle()
-    expect(await rows($)).toEqual([HEAD_ROW, METERS_ROW])
+    expect(await rows($)).toEqual([HEAD_ROW, CONTEXT, METERS_ROW])
   })
 
   test('the rows give way as the width narrows, and never overflow', async ($, on) => {
     const { clock } = setUp(on)
     await $.session.start(START)
     await clock.settle()
-    const MODEL = '✻ Opus 5.5  effort ?'
-    // The context meter stays beside the model while any drawing of it fits: shorter, then without its detail.
-    expect(await rows($, { columns: 70 })).toEqual([HEAD_ROW, LIMITS])
-    expect(await rows($, { columns: 40 })).toEqual([`${MODEL} · ctx ━───── 23%`, '5h ━━──── 28% · 7d ━━━─── 42%'])
-    // With no room beside the model it leads the meters below.
-    expect(await rows($, { columns: 30 })).toEqual([MODEL, 'ctx ━───── 23% · 5h ━━──── 28%', '7d ━━━─── 42%'])
+    // The context meter is on its own row, drawn as wide as the width allows.
+    expect(await rows($, { columns: 70 })).toEqual([MODEL, CONTEXT, LIMITS])
+    expect(await rows($, { columns: 40 })).toEqual([MODEL, CONTEXT, '5h ━━──── 28% · 7d ━━━─── 42%'])
+    // The limits keep one row on shorter bars, and take a row each only when two do not fit on one.
+    expect(await rows($, { columns: 26 })).toEqual([MODEL, 'ctx ━───── 23%  46k/200k', '5h ━─── 28% · 7d ━━── 42%'])
     expect(await rows($, { columns: 20 })).toEqual([MODEL, 'ctx ━───── 23%', '5h ━━──── 28%', '7d ━━━─── 42%'])
     for (const columns of [70, 50, 40, 30, 24, 20]) {
       for (const row of await rows($, { columns })) expect(textWidth(row)).toBeLessThanOrEqual(columns)
     }
+  })
+
+  test('the git part sits beside the model only while it fits whole; else it has a row below', async ($, on) => {
+    const { clock } = setUp(on, { repo: { status: `# branch.oid ${OID}\n# branch.head feature/bar\n` }, prs: [openPr] })
+    await $.session.start(START)
+    await clock.settle()
+    expect((await rows($, { columns: 120 }))[0]).toBe(`${MODEL} │ ~/dev/acme-web · feature/bar · PR #12`)
+    // Too narrow for the whole of it beside the model: a row of its own, cut as before.
+    expect((await rows($, { columns: 50 })).slice(0, 2)).toEqual([MODEL, '~/dev/acme-web · feature/bar · PR #12'])
+    // Narrower, the pull request goes before the path is cut.
+    expect((await rows($, { columns: 30 })).slice(0, 2)).toEqual([MODEL, '~/dev/acme-web · feature/bar'])
   })
 
   test('a phone gets the same rows, narrow, in a face of one width', async ($, on) => {
@@ -270,7 +281,7 @@ describe('the line under the prompt', () => {
     await clock.settle()
     for (const surface of ['mobile', 'vscode'] as const) {
       const drawnRows = await rows($, { surface, columns: 36 })
-      expect(drawnRows).toEqual(['~/dev/acme-web · feature/a-long-bra…', '✻ Opus 5.5  effort ? · ctx ━─── 23%', '5h ━━──── 28% · 7d ━━━─── 42%'])
+      expect(drawnRows).toEqual([MODEL, '~/dev/acme-web · feature/a-long-bra…', CONTEXT, '5h ━━──── 28% · 7d ━━━─── 42%'])
       for (const row of drawnRows) expect(textWidth(row)).toBeLessThanOrEqual(36)
     }
     const tree = JSON.stringify(await drawn($, { surface: 'mobile', columns: 36 }))
@@ -284,7 +295,7 @@ describe('the git row', () => {
     await $.session.start(START)
     await clock.settle()
     for (const surface of ['terminal', 'desktop'] as const) {
-      expect(await rows($, { surface })).toEqual(['~/dev/acme-web · feature/bar', HEAD_ROW, METERS_ROW])
+      expect(await rows($, { surface })).toEqual([`${MODEL} │ ~/dev/acme-web · feature/bar`, CONTEXT, METERS_ROW])
     }
     const gits = runs.filter(run => run.argv[0] === 'git')
     expect(gits.length).toBeGreaterThan(0)
@@ -301,23 +312,23 @@ describe('the git row', () => {
     })
     await $.session.start(START)
     await clock.settle()
-    expect((await rows($))[0]).toBe('~/dev/acme-web/.claude/worktrees/fix · (1234567) (REBASING)')
+    expect((await rows($))[0]).toBe(`${MODEL} │ ~/dev/acme-web/.claude/worktrees/fix · (1234567) (REBASING)`)
   })
 
   test('a branch switched in another terminal shows on the next poll; one switched by a tool at once', async ($, on) => {
     const { world, clock } = setUp(on, { repo: { status: `# branch.oid ${OID}\n# branch.head main\n` } })
     await $.session.start(START)
     await clock.settle()
-    expect((await rows($))[0]).toBe('~/dev/acme-web · main')
+    expect((await rows($))[0]).toBe(`${MODEL} │ ~/dev/acme-web · main`)
 
     world.repo = { status: `# branch.oid ${OID}\n# branch.head fix/a\n` }
     await clock.advance(30_000)
-    expect((await rows($))[0]).toBe('~/dev/acme-web · fix/a')
+    expect((await rows($))[0]).toBe(`${MODEL} │ ~/dev/acme-web · fix/a`)
 
     world.repo = { status: `# branch.oid ${OID}\n# branch.head fix/b\n` }
     await $.tool.call({ tool: 'Bash', command: 'git switch -c fix/b' })
     await clock.settle()
-    expect((await rows($))[0]).toBe('~/dev/acme-web · fix/b')
+    expect((await rows($))[0]).toBe(`${MODEL} │ ~/dev/acme-web · fix/b`)
   })
 })
 
@@ -330,7 +341,7 @@ describe('the pull request', () => {
     await $.session.start(START)
     await clock.settle()
     for (const surface of ['terminal', 'desktop'] as const) {
-      expect((await rows($, { surface }))[0]).toBe('~/dev/acme-web · feature/bar · PR #12')
+      expect((await rows($, { surface }))[0]).toBe(`${MODEL} │ ~/dev/acme-web · feature/bar · PR #12`)
     }
 
     const ui = await $.ui.mount({
@@ -366,7 +377,7 @@ describe('the pull request', () => {
     const { clock, runs } = setUp(on, { repo, isGhFailing: true })
     await $.session.start(START)
     await clock.settle()
-    expect((await rows($))[0]).toBe('~/dev/acme-web · feature/bar')
+    expect((await rows($))[0]).toBe(`${MODEL} │ ~/dev/acme-web · feature/bar`)
     await clock.advance(60_000)
     expect(runs.filter(run => run.argv[0] === 'gh')).toHaveLength(1)
   })
@@ -396,7 +407,7 @@ describe('the Fable limit', () => {
     await clock.settle()
     for (const surface of ['terminal', 'desktop'] as const) {
       // It starts over with the weekly limit, so the countdown stays on the weekly meter alone.
-      expect((await rows($, { surface }))[1]).toEndWith('7d ━━━━────── 42%  ↻3d · fable ━━━━━━──── 60%')
+      expect((await rows($, { surface }))[2]).toEndWith('7d ━━━━────── 42%  ↻3d · fable ━━━━━━──── 60%')
     }
     expect(fetches).toEqual([{ url: USAGE_URL, auth: 'auth_test', beta: 'oauth-2025-04-20' }])
   })
@@ -410,7 +421,7 @@ describe('the Fable limit', () => {
     world.answers = [{ status: 200, text: usageBody(75) }]
     await clock.advance(60_000)
     expect(asked(fetches)).toBe(2)
-    expect((await rows($))[1]).toContain('fable ━━━━━━━━── 75%')
+    expect((await rows($))[2]).toContain('fable ━━━━━━━━── 75%')
   })
 
   test('another model asks nothing and draws no Fable meter', async ($, on) => {
@@ -499,7 +510,7 @@ describe('parts', () => {
 
   test('a session with no limits and no reading yet still draws', async () => {
     const usage: Usage = { model: 'claude-fable-5-2', context: { window: 1_000_000 }, minute: 0 }
-    expect(usageRows(usage, { kind: 'none' }, undefined, 120, NOW).map(rowText)).toEqual(['✻ Fable 5.2 · ctx ────────── —  —/1M'])
+    expect(statusRows({ usage, effort: { kind: 'none' }, fable: undefined, git: null, pr: undefined }, 120, NOW).map(rowText)).toEqual(['✻ Fable 5.2', 'ctx ────────── —  —/1M'])
   })
 
   test('formats', async () => {

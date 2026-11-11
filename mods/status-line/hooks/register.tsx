@@ -1,6 +1,6 @@
 // status-line: a status line under the prompt.
-//   Below the engine's own hint line it draws a git row (path · branch · pull request), a model row
-//   (model, effort and the context window) and the plan's limits under it (five-hour, weekly, Fable's own),
+//   Under the engine's own hint line it draws: the model and effort beside the git part (path, branch,
+//   pull request), the context window, and the plan's limits (five-hour, weekly, Fable's own),
 //   each limit as a bar whose color follows what is left. The rows fold as the terminal narrows.
 //   Figures come from the engine ($.session.usage), the repository from git, the pull request from gh,
 //   the Fable limit from the plan's usage endpoint.
@@ -11,7 +11,7 @@ import type { Effort, FableReading, Git, PullRequestReading, Usage } from '../ty
 import { configuredEffort, effortFrom, effortOfStep, isModelSwitch } from './effort'
 import { isFable } from './fable'
 import { markPullRequestStale, refreshGit, refreshUsage } from './feeds'
-import { gitRows, usageRows } from './layout'
+import { statusRows } from './layout'
 import { isSame } from './same'
 import type { Span } from './theme'
 
@@ -133,7 +133,8 @@ export const register: Register = (on, options) => {
   }).catch(($, e, next) => next(e))
 
   // The hint line under the prompt. Keeping the engine's own drawing (`next`) keeps its line alive
-  // (mode, shortcuts, pills); the rows go under it.
+  // (mode, shortcuts, pills); the terminal draws that line first whatever its place in the tree, so the rows
+  // go under it.
   on('ui.render', { component: 'PromptHint' }, async ($, e, next) => {
     const own = await next(e)
     const [usage, effort, git, pr, fable] = await Promise.all([
@@ -157,7 +158,7 @@ export const register: Register = (on, options) => {
     const now = await $.clock.now()
     const shownPr = git !== null && pr !== null && pr.key === git.prKey ? pr.value : undefined
     const shownFable = isFable(usage.model) ? fable?.window : undefined
-    const rows = [...gitRows(git, shownPr, columns), ...usageRows(usage, effort, shownFable, columns, now)]
+    const rows = statusRows({ usage, effort, fable: shownFable, git, pr: shownPr }, columns, now)
 
     // Bars and columns only line up in one-width letters: a surface with a proportional face is asked
     // for its monospaced one (the terminal has no other).
