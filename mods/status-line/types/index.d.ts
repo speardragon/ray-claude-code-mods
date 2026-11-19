@@ -12,8 +12,13 @@ export type Usage = {
   context: { tokens?: number; window: number; percent?: number }
   fiveHour?: LimitWindow
   sevenDay?: LimitWindow
+  // What the session has cost so far, in whole cents: a fraction of a cent would redraw on every response.
+  costCents?: number
   minute: number
 }
+
+// The subagents and teammates still at work (pending, running or waiting on a permission).
+export type Agents = { active: number }
 
 export type GitOperation = 'rebasing' | 'merging' | 'cherry-picking' | 'reverting' | 'bisecting'
 
@@ -58,6 +63,7 @@ declare module 'claude-code' {
       git: Git | null
       pr: PullRequestReading | null
       fable: FableReading | null
+      agents: Agents | null
     }
   }
 }

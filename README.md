@@ -29,7 +29,7 @@
 | 🧩 | [**mod-manager**](mods/mod-manager) | 설치한 mod를 한 곳에서 둘러보고, 켜고 끄고, 각 mod의 패널을 바로 엽니다. | `/mods` |
 | 📖 | [**readability**](mods/readability) | Claude의 응답을 읽기 편하게 다시 그립니다. 스트리밍 중에도, 끝날 때 레이아웃이 튀지 않게. | `/readability` |
 | 🗜️ | [**tool-fold**](mods/tool-fold) | 도구 호출을 한 줄씩, 결과는 접어 두고 클릭하면 펼치기. `/tools panel`로 도구별 상세 패널(MongoDB는 Compass 스타일, 이미지는 그림 그대로). | `/tools` |
-| 📊 | [**status-line**](mods/status-line) | 프롬프트 아래에 모델·effort, 컨텍스트와 5시간·주간·Fable 한도 바, 경로·브랜치와 PR을 보여줍니다. | 항상 표시 |
+| 📊 | [**status-line**](mods/status-line) | 프롬프트 아래에 모델·effort와 컨텍스트·5시간·주간·Fable 한도 바를 왼쪽에, 경로·브랜치·PR·비용·모드·에이전트를 오른쪽에 표처럼 보여줍니다. | 항상 표시 |
 
 ## 🚀 설치
 
@@ -154,9 +154,9 @@ claude plugin install status-line@ray-claude-code-mods
 
 <img src="images/status-line.png" alt="status-line" width="100%">
 
-- **세 줄**: `모델 │ 경로 · 브랜치 · PR`, 컨텍스트, 5시간 · 주간 · Fable 한도. 바 색은 남은 양에 따라 바뀜.
-- **git 정보**: 전체 경로(`~/dev/acme-web`) · 브랜치 · 브랜치의 PR을 모델 옆에. PR 번호 색이 상태, 누르면 열림.
-- **폭에 맞춰 쌓임**: 좁아지면 git이 자기 줄로 내려가고, 좁아지면 바를 줄이고 줄을 늘려요. 모바일에서도 넘치지 않게.
+- **표처럼 두 칸**: 왼쪽은 모델 · effort와 컨텍스트 · 5시간 · 7일 · Fable 한도 바, 오른쪽은 경로 · 브랜치 · PR · 비용 · 권한 모드 · 일하는 에이전트.
+- **칸 나뉜 큰 바**: 미터마다 제 색, 8분의 1 칸 단위로 채움. `10분 후 초기화`처럼 한국어 설명. PR 번호 색이 상태, 누르면 열림.
+- **폭에 맞춰 접힘**: 좁아지면 오른쪽 정보가 미터 아래 두 줄로 내려가고, 더 좁으면 바를 줄이고 설명을 빼요. 모바일에서도 넘치지 않게.
 
 [자세히 보기 →](mods/status-line)
 

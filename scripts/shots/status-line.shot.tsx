@@ -7,7 +7,7 @@ const NOW = Date.parse('2026-11-10T12:00:00Z')
 const HOME = '/Users/ray'
 const ROOT = `${HOME}/dev/acme-web`
 const WEEK_RESET = '2026-11-15T12:00:00Z'
-const WIDTH = 124
+const WIDTH = 132
 const RULE = '─'.repeat(WIDTH - 2)
 
 // The renderer paints raw colors; the theme keys the mod uses are spelled out as the dark theme has them.
@@ -23,6 +23,9 @@ const THEME: Record<string, string> = {
   gray: '#8b949e',
   green: '#3fb950',
   yellow: '#d29922',
+  text: '#e6edf3',
+  planMode: '#48968c',
+  error: '#f85149',
 }
 
 const STATUS = [
@@ -54,9 +57,10 @@ const PR = {
 const painted = (node: Node | string): Node | string => {
   if (typeof node === 'string') return node
   const color = typeof node.props?.color === 'string' ? (THEME[node.props.color] ?? node.props.color) : undefined
+  const background = typeof node.props?.backgroundColor === 'string' ? (THEME[node.props.backgroundColor] ?? node.props.backgroundColor) : undefined
   return {
     ...node,
-    ...(node.props ? { props: { ...node.props, ...(color ? { color } : {}) } } : {}),
+    ...(node.props ? { props: { ...node.props, ...(color ? { color } : {}), ...(background ? { backgroundColor: background } : {}) } } : {}),
     ...(node.children ? { children: node.children.map(painted) } : {}),
   }
 }
@@ -80,14 +84,22 @@ test('status-line', async ($, on) => {
   on('session.usage', () => ({
     value: {
       startedAt: NOW,
-      context: { window: 1_000_000, tokens: 715_000, percent: 71 },
+      context: { window: 1_000_000, tokens: 103_000, percent: 10 },
+      cost: { usd: 4.237 },
       rateLimits: [
-        { kind: 'five_hour', percentUsed: 13, resetsAt: '2026-11-10T15:35:00Z' },
+        { kind: 'five_hour', percentUsed: 25, resetsAt: '2026-11-10T12:10:00Z' },
         { kind: 'seven_day', percentUsed: 82, resetsAt: WEEK_RESET },
       ],
     },
   }))
   on('session.repo', () => ({ value: { root: ROOT, remote: 'git@github.com:acme/acme-web.git', internal: false, name: null } }))
+  on('agent.list', () => ({
+    value: [
+      { id: 'a1', description: 'Explore the hooks', type: 'Explore', status: 'running' },
+      { id: 'a2', description: 'Review layout', type: 'general-purpose', status: 'running' },
+      { id: 'a3', description: 'Done one', type: 'Explore', status: 'completed' },
+    ],
+  }))
   on('settings.read', () => ({ value: { effortLevel: 'high' } }))
   on('env.get', (_, e) => ({ value: e.name === 'HOME' ? HOME : undefined }))
   on('ui.log', () => ({ value: undefined }))
@@ -110,7 +122,7 @@ test('status-line', async ($, on) => {
     plugin: 'status-line',
     component: 'PromptHint',
     surface: 'terminal',
-    props: { isDraft: false, isWorking: false, hint: '' },
+    props: { isDraft: false, isWorking: false, hint: '⏵⏵ accept edits on (shift+tab to cycle)' },
     viewport: { columns: WIDTH, rows: 40 },
   } as never)
   const drawn = painted((await ui.drawn()) as Node) as Node
@@ -121,5 +133,5 @@ test('status-line', async ($, on) => {
     props: { flexDirection: 'column' },
     children: [rule, { type: 'Text', children: ['❯ '] }, rule, drawn],
   }
-  throw new Error(`@@SHOT@@${JSON.stringify({ name: 'status-line', width: WIDTH, height: 7, title: 'claude — ~/acme-web', tree, clients: {} })}@@END@@`)
+  throw new Error(`@@SHOT@@${JSON.stringify({ name: 'status-line', width: WIDTH, height: 10, title: 'claude — ~/acme-web', tree, clients: {} })}@@END@@`)
 })

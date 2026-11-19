@@ -2,50 +2,62 @@
 
 [한국어](README.md) · **English**
 
-A status line under the prompt: which folder and branch you are in, and how much of the context window and the plan's
-limits is used, always in view.
+A status line under the prompt, laid out like a table: the model and meters for the context window and the plan's
+limits on the left; the path, branch, pull request, cost, permission mode and agents at work on the right.
 
 <img src="../../images/status-line.png" alt="status-line" width="100%">
 
 ## What it shows
 
 ```
-  ⏵⏵ accept edits on (shift+tab to cycle)            ← Claude Code's own hint line (kept, always on top)
-  ✻ Fable 5.2  ●●●○○ high │ ~/dev/acme-web · feat/status-line · PR #12    ← ① model │ git
-  ctx ━━━━━━━─── 71%  715k/1M                        ← ② context
-  5h ━───────── 13%  ↻3h35m · 7d ━━━━━━━━── 82%  ↻5d · fable ━━━━────── 37%    ← ③ limits
+  ⏵⏵ accept edits on (shift+tab to cycle)    ← Claude Code's own hint line (kept, always on top)
+● Model       Fable 5.2  Effort ██▎█▎█▎█▎█ HIGH (3/5)     │  경로      ~/dev/acme-web
+● 컨텍스트    █▋██│████│████│████    10%  103k / 1M 토큰  │  브랜치    feat/status-line
+● 5시간 한도  ████│████│████│████    25%  10분 후 초기화  │  PR        #12
+● 7일 한도    ████│████│████│█▏██    82%  5일 후 초기화   │  비용      $4.24
+● Fable 한도  ████│█▉██│████│████    37%  5일 후 초기화   │  모드      편집 자동 수락
+                                                          │  에이전트  2개 실행 중
 ```
 
-| Row | Item | What it is |
-| --- | --- | --- |
-| ① | path | The working tree's full path, the home folder as `~`; inside a worktree, that worktree's |
-| ① | branch | `(commit)` on a detached HEAD; an operation under way (a rebase, a merge, ...) as `(REBASING)` |
-| ① | pull request | The branch's pull request number; its color is the state, and pressing it opens the page |
-| ① | model, effort | The model's name and its effort on five steps (`●●●○○ high`) |
-| ② | `ctx` | The context window's fill, and `tokens used/window size` |
-| ③ | `5h`, `7d` | The five-hour and weekly limits, with the time to their reset (`↻3h35m`) |
-| ③ | `fable` | The Fable-only weekly limit, while the model is Fable |
+Meters on the left, the state of things on the right. The labels and details are in Korean.
 
-Outside a repository row ① holds the model and effort alone. Claude Code's hint line is always drawn on top by the
-engine, so this mod's rows sit under it.
+| Side | Item | What it is |
+| --- | --- | --- |
+| left | Model, Effort | The model's name and its effort on five steps (`██▎█▎█▎█▎█ HIGH (3/5)`, five squares) |
+| left | 컨텍스트 (context) | The context window's fill, and `tokens used / window size` |
+| left | 5시간 한도, 7일 한도 (five-hour, weekly) | The limits' use and the time to their reset (`2시간 13분 후 초기화`) |
+| left | Fable 한도 | The Fable-only weekly limit and the time to its reset, whatever the model |
+| right | 경로 (path) | The working tree's full path, the home folder as `~`; inside a worktree, that worktree's |
+| right | 브랜치 (branch) | `(commit)` on a detached HEAD; an operation under way (a rebase, a merge, ...) as `(REBASING)` |
+| right | PR | The branch's pull request number; its color is the state, and pressing it opens the page |
+| right | 비용 (cost) | What the session has cost so far, as `/cost` totals it |
+| right | 모드 (mode) | The permission mode: accept edits, plan, auto, bypass permissions; no row in the default mode |
+| right | 에이전트 (agents) | Subagents and teammates at work (pending, running, waiting on a permission); `쉬는 중` (resting) when none |
+
+Outside a repository the path, branch and pull request rows go, as does any row without a value (no pull request,
+a host with no cost ledger). Claude Code's hint line is always drawn on top by the engine, so this mod's rows sit
+under it.
 
 ### Colors
 
-- **Bars**: by what is left: green, then yellow (half), orange (a quarter), red (a tenth, with a `!`). The `fable`
-  meter is always a deep orange, to stand apart from the others.
+- **Bars**: each meter its own color (context teal, five-hour blue, weekly purple, Fable terracotta), in calm mid-tones. Empty cells
+  are dark blocks, so a bar keeps its length when nearly empty; cells fill by eighths, and a light line parts the four
+  segments without breaking the bar; effort's squares part on a groove in a darker shade of their color.
+- **Percentages**: by what is left: the text color, then yellow (half), orange (a quarter), red (a tenth, with a `!`).
 - **Pull request number**: draft grey; conflict, failed checks or changes requested red; approved and mergeable green;
   any other open one orange; merged purple.
 
 ### Fitted to the width
 
-| Width | ① model │ git | ② context | ③ limits |
-| --- | --- | --- | --- |
-| Wide | model │ git on one row | a long bar with the tokens | one row, long bars with the time left |
-| Narrower | a row for the model and one for git, where git does not fit whole beside it | a shorter bar, then without the tokens | one row with shorter bars, then without the time left |
-| Very narrow | the same | the same | a row per meter |
+| Width | Right block | Left block |
+| --- | --- | --- |
+| Wide | beside the meters, after a `│` | four segments of four cells, with details |
+| Narrower | the same | segments of three, then two cells |
+| Narrow | folded under the meters in two rows: `path · branch · PR #12`, `cost · mode · agents` | details kept, bars shortened |
+| Very narrow | the same | details dropped, labels shortened (`5시간`), the model row without its label |
 
-Git sits beside the model only while its path and pull request fit whole. Otherwise it takes a row of its own, and
-if that overflows the branch name is cut, then the start of the path (`…/acme-web`), and the pull request goes last.
+The right block stays beside only while the meters keep their details (countdowns, token counts). Folded, if the git
+row overflows the branch name is cut, then the start of the path (`…/acme-web`), and the pull request goes last.
 Hangul counts two cells.
 
 A surface that does not say its width is taken as narrow (40 columns on mobile), and the rows ask for a monospaced
@@ -77,7 +89,10 @@ footer in `/config`.
 | --- | --- |
 | Context, five-hour and weekly limits | on every measurement the engine takes, and each minute (the countdowns) |
 | Effort | on each request of the main thread, and right after `/effort` or `/model`; guessed from settings before the first |
-| Fable limit | once in five minutes, while the model is Fable |
+| Fable limit | once in five minutes, whatever the model |
+| Cost | with the context |
+| Mode | each time the hint line is drawn (the engine gives no read of the mode, so it is read from the hint line's words) |
+| Agents | when an agent starts, when an Agent tool call ends, and every 5 seconds (no event marks a background agent's end) |
 | Git | when a tool that changes files ends (Bash, Edit, Write, ...), and every 30 seconds |
 | Pull request | at once when the branch changes, after `git push` or a `gh pr` command, or after a push or pull from another terminal; otherwise every 3 minutes |
 
@@ -99,4 +114,5 @@ to Fable from `limits`.
 ## Not shown
 
 - Counts of changed files and the distance from upstream: left out to keep the row short.
-- Subagents and the task list: Claude Code shows those itself.
+- The task list: Claude Code shows it itself.
+- The output style: the engine gives a mod no direct read of it.

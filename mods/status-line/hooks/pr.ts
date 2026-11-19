@@ -69,7 +69,7 @@ export function pullRequestColor(pr: PullRequest): string {
   if (pr.state === 'closed') return T.faint
   if (pr.state === 'draft') return T.muted
   if (pr.merge === 'conflict' || pr.checks === 'fail' || pr.review === 'changes') return T.status.critical
-  if (pr.review === 'approved' && pr.merge === 'clean' && pr.checks !== 'pending') return T.status.good
+  if (pr.review === 'approved' && pr.merge === 'clean' && pr.checks !== 'pending') return T.active
   return T.status.serious
 }
 

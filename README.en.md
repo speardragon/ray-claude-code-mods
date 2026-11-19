@@ -29,7 +29,7 @@
 | 🧩 | [**mod-manager**](mods/mod-manager/README.en.md) | Browse your installed mods in one place, switch them on and off, open their panels. | `/mods` |
 | 📖 | [**readability**](mods/readability/README.en.md) | Draws Claude's replies for reading: while they stream, and without a jolt when they end. | `/readability` |
 | 🗜️ | [**tool-fold**](mods/tool-fold/README.en.md) | Tool calls as one line each, results folded; click to unfold. `/tools panel` shows each call in a view that suits its tool (MongoDB as Compass, images as pictures). | `/tools` |
-| 📊 | [**status-line**](mods/status-line/README.en.md) | Under the prompt: model and effort, bars for context and the five-hour, weekly and Fable limits, the path, branch and its pull request. | always on |
+| 📊 | [**status-line**](mods/status-line/README.en.md) | Under the prompt, like a table: model, effort and bars for context and the five-hour, weekly and Fable limits on the left; path, branch, pull request, cost, mode and agents on the right. | always on |
 
 ## 🚀 Install
 
@@ -154,9 +154,9 @@ Start a new session, or type `/reload-plugins`, and they are ready.
 
 <img src="images/status-line.png" alt="status-line" width="100%">
 
-- **Three rows**: `model │ path · branch · PR`, the context window, and the five-hour, weekly and Fable limits, each a bar colored by what is left.
-- **Git, beside the model**: the full path (`~/dev/acme-web`), the branch and the branch's pull request; the number's color is its state, and pressing it opens the page.
-- **Fitted to the width**: git drops to a row of its own, with shorter bars and more rows as it narrows; nothing overflows on a phone.
+- **Two columns, like a table**: on the left the model, effort and bars for the context and the five-hour, weekly and Fable limits; on the right the path, branch, pull request, cost, permission mode and agents at work.
+- **Big segmented bars**: each meter its own color, filled by eighths of a cell, with details in Korean (`10분 후 초기화`). The pull request number's color is its state, and pressing it opens the page.
+- **Fitted to the width**: narrower, the right block folds under the meters in two rows, then the bars shorten and the details go; nothing overflows on a phone.
 
 [More →](mods/status-line/README.en.md)
 

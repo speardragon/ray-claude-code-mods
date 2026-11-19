@@ -1,7 +1,7 @@
 {
   "name": "status-line",
-  "version": "0.3.0",
-  "description": "A status line under the prompt: the model and effort beside the folder, branch and pull request, then context and the five-hour, weekly and Fable limits as bars.",
+  "version": "0.4.0",
+  "description": "A status line under the prompt: the model and effort, then context and the five-hour, weekly and Fable limits as segmented bars, beside the path, branch, pull request, cost, permission mode and agents at work.",
   "author": {
     "name": "Ray Kang"
   },

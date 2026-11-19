@@ -1,17 +1,18 @@
 // status-line: a status line under the prompt.
-//   Under the engine's own hint line it draws: the model and effort beside the git part (path, branch,
-//   pull request), the context window, and the plan's limits (five-hour, weekly, Fable's own),
-//   each limit as a bar whose color follows what is left. The rows fold as the terminal narrows.
-//   Figures come from the engine ($.session.usage), the repository from git, the pull request from gh,
-//   the Fable limit from the plan's usage endpoint.
+//   Under the engine's own hint line it draws two blocks: on the left the model and effort, then the
+//   context window and the plan's limits (five-hour, weekly, Fable's own) as segmented bars; on the right
+//   the path, branch, pull request, cost, permission mode and the agents at work. The right block folds
+//   under the left as the terminal narrows.
+//   Figures come from the engine ($.session.usage, $.agent.list), the repository from git, the pull
+//   request from gh, the Fable limit from the plan's usage endpoint (on every model), the mode from the hint line.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
-import type { Effort, FableReading, Git, PullRequestReading, Usage } from '../types'
+import type { Agents, Effort, FableReading, Git, PullRequestReading, Usage } from '../types'
 import { configuredEffort, effortFrom, effortOfStep, isModelSwitch } from './effort'
-import { isFable } from './fable'
-import { markPullRequestStale, refreshGit, refreshUsage } from './feeds'
+import { markPullRequestStale, refreshAgents, refreshGit, refreshUsage } from './feeds'
 import { statusRows } from './layout'
+import { modeOf } from './mode'
 import { isSame } from './same'
 import type { Span } from './theme'
 
@@ -22,9 +23,11 @@ const effortAtom = atom({ plugin: 'status-line', key: 'effort' } as const, { kin
 const gitAtom = atom({ plugin: 'status-line', key: 'git' } as const, null as Git | null)
 const prAtom = atom({ plugin: 'status-line', key: 'pr' } as const, null as PullRequestReading | null)
 const fableAtom = atom({ plugin: 'status-line', key: 'fable' } as const, null as FableReading | null)
+const agentsAtom = atom({ plugin: 'status-line', key: 'agents' } as const, null as Agents | null)
 
 const USAGE_TICK_MS = 60_000 // the countdowns move by the minute
 const GIT_TICK_MS = 30_000 // changes made outside the session (another terminal) show within this
+const AGENTS_TICK_MS = 5_000 // no event marks an agent's end: a background one is seen done within this
 const FOOTER_INSET = 4 // the hint line is told the screen's width; its margins come off it
 // Before the surface has been measured: a terminal is assumed wide, a phone narrow.
 const FALLBACK_COLUMNS: Readonly<Record<string, number>> = { terminal: 120, desktop: 100, vscode: 80, mobile: 40 }
@@ -55,7 +58,7 @@ async function setEffort($: EngineInterface, effort: Effort): Promise<void> {
 // Fills every atom the line reads. Safe to call again: it only writes what differs.
 async function prime($: EngineInterface, account: string): Promise<void> {
   if ((await read($, effortAtom)).kind === 'unknown') await setEffort($, await configuredEffort($))
-  await Promise.all([refreshUsage($), refreshGit($, account)])
+  await Promise.all([refreshUsage($), refreshGit($, account), refreshAgents($)])
 }
 
 async function openUrl($: EngineInterface, url: string): Promise<void> {
@@ -90,6 +93,7 @@ export const register: Register = (on, options) => {
     timers = [
       $.clock.every(USAGE_TICK_MS, () => void refreshUsage($)),
       $.clock.every(GIT_TICK_MS, () => void refreshGit($, account)),
+      $.clock.every(AGENTS_TICK_MS, () => void refreshAgents($)),
     ]
     $.clock.after(0, () => void prime($, account))
     return result
@@ -132,17 +136,31 @@ export const register: Register = (on, options) => {
     return result
   }).catch(($, e, next) => next(e))
 
+  // A new agent shows at once; one the Agent tool waited on is seen done as the call returns.
+  on('agent.spawn', async ($, e, next) => {
+    const result = await next(e)
+    if (isLive) $.clock.after(0, () => void refreshAgents($))
+    return result
+  })
+
+  on('tool.call', { tool: 'Agent' }, async ($, e, next) => {
+    const result = await next(e)
+    if (isLive) $.clock.after(0, () => void refreshAgents($))
+    return result
+  }).catch(($, e, next) => next(e))
+
   // The hint line under the prompt. Keeping the engine's own drawing (`next`) keeps its line alive
   // (mode, shortcuts, pills); the terminal draws that line first whatever its place in the tree, so the rows
   // go under it.
   on('ui.render', { component: 'PromptHint' }, async ($, e, next) => {
     const own = await next(e)
-    const [usage, effort, git, pr, fable] = await Promise.all([
+    const [usage, effort, git, pr, fable, agents] = await Promise.all([
       read($, usageAtom),
       read($, effortAtom),
       read($, gitAtom),
       read($, prAtom),
       read($, fableAtom),
+      read($, agentsAtom),
     ])
     if (usage === null) {
       // /clear empties the session's state without starting the session again: fill it from a timer,
@@ -157,8 +175,9 @@ export const register: Register = (on, options) => {
     const columns = Math.max(MIN_COLUMNS, (e.viewport?.columns ?? FALLBACK_COLUMNS[e.surface] ?? 80) - FOOTER_INSET)
     const now = await $.clock.now()
     const shownPr = git !== null && pr !== null && pr.key === git.prKey ? pr.value : undefined
-    const shownFable = isFable(usage.model) ? fable?.window : undefined
-    const rows = statusRows({ usage, effort, fable: shownFable, git, pr: shownPr }, columns, now)
+    const mode = modeOf(e.props.hint)
+    const facts = { ...(usage.costCents !== undefined ? { costCents: usage.costCents } : {}), ...(mode ? { mode } : {}), agents }
+    const rows = statusRows({ usage, effort, fable: fable?.window, git, pr: shownPr, facts }, columns, now)
 
     // Bars and columns only line up in one-width letters: a surface with a proportional face is asked
     // for its monospaced one (the terminal has no other).

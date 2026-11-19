@@ -1,10 +1,11 @@
-// Keeps the atoms the line draws from current: the session's figures, the repository, its pull request.
+// Keeps the atoms the line draws from current: the session's figures, the repository, its pull request,
+// the agents at work.
 // Each refresh writes only what changed, so a quiet minute redraws nothing.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, SessionRateLimit, SessionUsage } from 'claude-code'
 
-import type { FableReading, Git, LimitWindow, PullRequestReading, Usage } from '../types'
-import { fetchFable, isFable } from './fable'
+import type { Agents, FableReading, Git, LimitWindow, PullRequestReading, Usage } from '../types'
+import { fetchFable } from './fable'
 import { readGit } from './git'
 import { fetchPullRequest } from './pr'
 import { isSame } from './same'
@@ -14,6 +15,10 @@ const usageAtom = atom({ plugin: 'status-line', key: 'usage' } as const, null as
 const gitAtom = atom({ plugin: 'status-line', key: 'git' } as const, null as Git | null)
 const prAtom = atom({ plugin: 'status-line', key: 'pr' } as const, null as PullRequestReading | null)
 const fableAtom = atom({ plugin: 'status-line', key: 'fable' } as const, null as FableReading | null)
+const agentsAtom = atom({ plugin: 'status-line', key: 'agents' } as const, null as Agents | null)
+
+// A teammate waiting for a message is `idle`, not at work; `waiting` is one held on a permission.
+const ACTIVE_AGENT = new Set(['pending', 'running', 'waiting'])
 
 const MINUTE_MS = 60_000
 // A pull request is asked about again every three minutes; sooner while GitHub is still working out
@@ -21,7 +26,7 @@ const MINUTE_MS = 60_000
 const PR_REFRESH_MS = 3 * MINUTE_MS
 const PR_UNKNOWN_RETRY_MS = 20_000
 const BACKOFF_MS = 5 * MINUTE_MS
-// The usage endpoint is asked at most once in five minutes, and only while the model is Fable.
+// The usage endpoint is asked at most once in five minutes, whatever the model: the Fable limit is shown on every one.
 const FABLE_REFRESH_MS = 5 * MINUTE_MS
 const BACKOFF_CAP_MS = 60 * MINUTE_MS
 
@@ -47,6 +52,7 @@ export function usageOf(model: string, usage: SessionUsage, now: number): Usage 
     context: { window, ...(tokens !== undefined ? { tokens } : {}), ...(percent !== undefined ? { percent } : {}) },
     ...(fiveHour ? { fiveHour } : {}),
     ...(sevenDay ? { sevenDay } : {}),
+    ...(usage.cost !== undefined ? { costCents: Math.round(usage.cost.usd * 100) } : {}),
     minute: Math.floor(now / MINUTE_MS),
   }
 }
@@ -138,7 +144,7 @@ async function readUsage($: EngineInterface): Promise<void> {
     ])
     const next = usageOf(model, figures, now)
     if (!isSame(current, next)) await update($, usageAtom, () => next)
-    if (isFable(model)) await refreshFable($, now)
+    await refreshFable($, now)
   } catch (error) {
     $.ui.log(`status-line: usage not read: ${describe(error)}`, { to: 'debug' })
   }
@@ -165,4 +171,14 @@ export function refreshUsage($: EngineInterface): Promise<void> {
 
 export function refreshGit($: EngineInterface, account: string): Promise<void> {
   return gitGate(() => readRepository($, account))
+}
+
+export async function refreshAgents($: EngineInterface): Promise<void> {
+  try {
+    const [list, current] = await Promise.all([$.agent.list(), read($, agentsAtom)])
+    const next: Agents = { active: list.filter(agent => ACTIVE_AGENT.has(agent.status)).length }
+    if (!isSame(current, next)) await update($, agentsAtom, () => next)
+  } catch (error) {
+    $.ui.log(`status-line: agents not read: ${describe(error)}`, { to: 'debug' })
+  }
 }

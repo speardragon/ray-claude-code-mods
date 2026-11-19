@@ -1,4 +1,4 @@
-// Short forms of the figures the line shows: a model's name, a token count, the time to a reset.
+// Short forms of the figures the line shows: a model's name, a token count, the time to a reset, a cost.
 
 const MINUTE_MS = 60_000
 const DAY_MINUTES = 1440
@@ -24,18 +24,23 @@ export function formatTokens(count: number): string {
   return String(count)
 }
 
-export type ResetStyle = 'minutes' | 'hours'
-
-// The five-hour window counts to the minute (3h54m); the weekly one in days, or hours on its last day.
-export function resetIn(resetsAt: string | undefined, now: number, style: ResetStyle): string | undefined {
+// The time to a reset in Korean: 6일 21시간, 2시간 13분, 10분; `곧` once it has passed.
+export function resetIn(resetsAt: string | undefined, now: number): string | undefined {
   if (resetsAt === undefined) return undefined
   const at = Date.parse(resetsAt)
   if (!Number.isFinite(at)) return undefined
-  if (at <= now) return 'now'
+  if (at <= now) return '곧'
   const minutes = Math.ceil((at - now) / MINUTE_MS)
   const days = Math.floor(minutes / DAY_MINUTES)
   const hours = Math.floor((minutes % DAY_MINUTES) / 60)
-  if (days > 0) return style === 'hours' ? `${days}d` : `${days}d${hours}h`
-  if (hours === 0) return `${minutes}m`
-  return style === 'hours' ? `${hours}h` : `${hours}h${minutes % 60}m`
+  const parts =
+    days > 0
+      ? [`${days}일`, hours > 0 ? `${hours}시간` : '']
+      : hours > 0
+        ? [`${hours}시간`, minutes % 60 > 0 ? `${minutes % 60}분` : '']
+        : [`${minutes}분`]
+  return parts.filter(part => part !== '').join(' ')
 }
+
+// 124 → $1.24.
+export const formatCost = (cents: number) => `$${(cents / 100).toFixed(2)}`
